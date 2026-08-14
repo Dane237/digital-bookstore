@@ -1,0 +1,23 @@
+# Virtual Environment (CRITICAL - DO NOT TOUCH)
+venv/
+.venv/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django sensitive data / Local environment variables
+.env
+*.env
+local_settings.py
+
+# PostgreSQL local files
+*.sql
+*.dump
+
+# System files
+.DS_Store
+Thumbs.db
+
