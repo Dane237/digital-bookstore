@@ -1,62 +1,32 @@
 # 📚 PUC Digital Bookstore - Full-Stack Ecosystem
 
-A production-ready course book procurement system designed specifically for **Paññāsāstra University of Cambodia (PUC)**. This system synchronizes a **Flutter (Mobile/Web)** frontend with a **FastAPI (Python)** backend and a **PostgreSQL** relational database.
+This repository contains the complete ecosystem for the **Paññāsāstra University of Cambodia (PUC)** Bookstore system. All applications (Mobile and Web) share the same **PostgreSQL** database via a central **FastAPI** backend.
 
 ---
 
-## 🚀 Key Features
+## 📂 System Architecture (Separate Parts)
 
-### 🎓 For Students (Customers)
-*   **Guest Browsing**: Search and filter course books by Department without an account.
-*   **Smart Cart**: Real-time stock verification prevents over-ordering.
-*   **Secure Checkout**: Professional **Stripe Credit Card** payment flow.
-*   **Digital Token**: Instant generation of a unique 6-digit **Pickup PIN** and **QR Code**.
-*   **Order History**: Full visibility of current pickup locations and past receipts.
+This project is divided into specialized folders to allow independent development of the Mobile and Web platforms:
 
-### 🧑‍💼 For Staff & Admin
-*   **Manager Dashboard**: Real-time business intelligence with **Revenue Trends** and **Total Assets Worth**.
-*   **Fulfillment Flow**: Professional 3-step workflow (Prepare -> Verify -> Release).
-*   **Inventory Control**: ISBN Metadata Import tool (Google Books API).
-*   **Accountability**: Every fulfillment action is logged with the specific **Staff ID**.
-*   **Staff Management**: Admin-only tool to create employee accounts.
+1.  **[database/](./database)**: The "Single Source of Truth." Contains the SQL schema and table definitions shared by everyone.
+2.  **[backend/](./backend)**: The central "Brain" (FastAPI). All platforms (Mobile and Web) connect to this API.
+3.  **[etl/](./etl)**: Python data tools for managing and importing book inventory into the shared database.
+4.  **[mobile_app/](./mobile_app)**: The Flutter mobile project for Android & iOS (includes Admin, Staff, and Customer features).
+5.  **[web_app/](./web_app)**: Reserved for Web-based Staff and Customer portals.
 
 ---
 
-## 🛠️ Technical Stack
+## 🚀 Deployment Overview
 
-*   **Frontend**: Flutter (supports Android, iOS, Web)
-*   **Backend**: FastAPI (Python 3.11+)
-*   **Database**: PostgreSQL
-*   **Hosting**: Render (Database & API)
-*   **Payment**: Stripe API
+### 1. Database (PostgreSQL)
+Create a PostgreSQL instance on Render and run the script in `database/schema.sql`.
 
----
+### 2. Backend (FastAPI)
+Deploy the `backend/` folder to Render. Ensure the Environment Variables (`DB_HOST`, `STRIPE_KEY`, etc.) are configured.
 
-## ⚙️ Deployment Guide (Render.com)
-
-### 1. Database Setup
-1.  Create a **New PostgreSQL** instance on Render.
-2.  Run `etl/schema.sql` using the Render Query tool or pgAdmin.
-
-### 2. Backend API Setup
-1.  Create a **New Web Service** on Render connected to your GitHub.
-2.  Set **Build Command**: `pip install -r backend/requirements.txt`
-3.  Set **Start Command**: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
-4.  Add your Database credentials to the **Environment Variables** section.
-
-### 3. Flutter Sync
-1.  Update `baseUrl` in `lib/services/api_service.dart` to your Render service URL.
-2.  Build for web: `flutter build web`
-3.  Build for mobile: `flutter build apk --release`
+### 3. Applications
+- For Mobile details, see **[mobile_app/README.md](./mobile_app/README.md)**.
+- For Web details, documentation will be added to the `web_app/` folder as development begins.
 
 ---
-
-## 🔐 Credentials for Demo
-
-| Account Type | Email | Password |
-| :--- | :--- | :--- |
-| **Root Admin** | `admin@puc.edu.kh` | `pass123` |
-| **Staff Member** | Create via Dashboard | Assign via Admin |
-
----
-© 2024 PUC Digital Bookstore - Academic Project
+© 2026 PUC Digital Bookstore - Academic Project
