@@ -5,16 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
 
 class ApiService {
-  static String get baseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:8000/api';
-    }
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000/api';
-    } else {
-      return 'http://localhost:8000/api';
-    }
-  }
+  static String get baseUrl => 'https://digital-bookstore-wm64.onrender.com/api';
 
   Future<List<String>> fetchDepartments() async {
     try {
