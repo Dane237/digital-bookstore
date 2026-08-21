@@ -13,7 +13,7 @@ void main() {
 }
 
 class PUCBookstoreApp extends StatelessWidget {
-  const PUCBookstoreApp({Key? key}) : super(key: key);
+  const PUCBookstoreApp({super.key});
 
   @override
   Widget build(BuildContext context) {

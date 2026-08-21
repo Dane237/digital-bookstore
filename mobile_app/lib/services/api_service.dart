@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/book.dart';
-import 'package:flutter/foundation.dart';
-import 'dart:io' show Platform;
 
 class ApiService {
   static String get baseUrl => 'https://digital-bookstore-wm64.onrender.com/api';

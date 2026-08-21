@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:puc_digital_bookstore/main.dart';
+import '../lib/main.dart';
 
 void main() {
   testWidgets('Bookstore smoke test', (WidgetTester tester) async {

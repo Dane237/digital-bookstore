@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
-import 'show_pin_screen.dart';
-import 'pickup_instructions_screen.dart';
+import 'order_detail_screen.dart';
 import 'order_detail_screen.dart';
 
 final ordersProvider = FutureProvider.family<List<dynamic>, int>((ref, userId) async {
