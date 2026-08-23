@@ -60,12 +60,16 @@ def verify_password(password, stored_pass):
 
 def send_otp_email(target_email, otp):
     smtp_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
-    smtp_port = int(os.getenv('SMTP_PORT', 465))
+    try:
+        smtp_port = int(os.getenv('SMTP_PORT', '465'))
+    except (ValueError, TypeError):
+        smtp_port = 465
+        
     sender_email = os.getenv('SENDER_EMAIL')
     sender_password = os.getenv('SENDER_APP_PASSWORD')
 
     if not sender_email or not sender_password:
-        return False, "SENDER_EMAIL or SENDER_APP_PASSWORD is not set in Render environment variables."
+        return False, "SENDER_EMAIL or SENDER_APP_PASSWORD is not set."
 
     sender_password = sender_password.replace(" ", "")
 
@@ -75,16 +79,21 @@ def send_otp_email(target_email, otp):
     msg['To'] = target_email
 
     try:
-        # Use SMTP_SSL for port 465
-        logging.info(f"Attempting to send email via {smtp_server}:{smtp_port} using SSL")
-        with smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=15) as server:
-            server.login(sender_email, sender_password)
-            server.send_message(msg)
+        if smtp_port == 465:
+            logging.info(f"Attempting to send email via {smtp_server}:{smtp_port} using SSL")
+            with smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=15) as server:
+                server.login(sender_email, sender_password)
+                server.send_message(msg)
+        else:
+            logging.info(f"Attempting to send email via {smtp_server}:{smtp_port} using STARTTLS")
+            with smtplib.SMTP(smtp_server, smtp_port, timeout=15) as server:
+                server.starttls()
+                server.login(sender_email, sender_password)
+                server.send_message(msg)
         logging.info(f"Email sent successfully to {target_email}")
         return True, "Success"
-    except smtplib.SMTPAuthenticationError:
-        return False, "Gmail Authentication Failed. Your App Password might be incorrect or expired."
     except Exception as e:
+        logging.error(f"SMTP Error: {e}")
         return False, str(e)
 
 # — MODELS —
@@ -317,11 +326,9 @@ def forgot_password(req: OTPRequest):
         conn.close()
         raise HTTPException(status_code=404, detail="Account not found")
     
-    # Check if SMTP config is present before proceeding
+    # Log warning if SMTP config is missing, but don't crash yet
     if not os.getenv('SENDER_EMAIL') or not os.getenv('SENDER_APP_PASSWORD'):
-        cursor.close()
-        conn.close()
-        raise HTTPException(status_code=500, detail="Server Email Configuration missing. Please set SENDER_EMAIL and SENDER_APP_PASSWORD in Render environment variables.")
+        logging.warning("SENDER_EMAIL or SENDER_APP_PASSWORD is not set. Email will not be sent, but OTP is logged.")
 
     otp = str(secrets.randbelow(900000) + 100000)
     expires_at = datetime.now() + timedelta(minutes=10)
