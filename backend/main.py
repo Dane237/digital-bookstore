@@ -144,13 +144,20 @@ class ManualBookAddRequest(BaseModel):
 # — DATABASE (PostgreSQL) —
 
 def get_db_connection():
+    host = os.getenv('DB_HOST', 'localhost')
+    db_name = os.getenv('DB_NAME', 'puc_bookstore')
+    user = os.getenv('DB_USER', 'postgres')
+    password = os.getenv('DB_PASSWORD', 'pass123')
+    port = os.getenv('DB_PORT', '5432')
+    
+    logging.info(f"Connecting to DB at {host}:{port}/{db_name}")
     return psycopg2.connect(
-        host=os.getenv('DB_HOST', 'localhost'),
-        database=os.getenv('DB_NAME', 'puc_bookstore'),
-        user=os.getenv('DB_USER', 'postgres'),
-        password=os.getenv('DB_PASSWORD', 'pass123'),
-        port=os.getenv('DB_PORT', '5432'),
-        connect_timeout=5
+        host=host,
+        database=db_name,
+        user=user,
+        password=password,
+        port=port,
+        connect_timeout=10
     )
 
 @app.get("/api/health/")
@@ -161,15 +168,16 @@ async def health_check():
         cursor.execute("SELECT 1")
         cursor.close()
         conn.close()
-        return {"status": "healthy", "database": "connected"}
+        return {"status": "healthy", "database": "connected", "details": "System is operational"}
     except Exception as e:
+        logging.error(f"Health Check Failed: {e}")
         return {"status": "unhealthy", "database": str(e)}
 
 def init_db():
     """Ensure required tables exist."""
-    conn = get_db_connection()
-    cursor = conn.cursor()
     try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS password_resets (
                 email VARCHAR(100) PRIMARY KEY REFERENCES users(email) ON DELETE CASCADE,
@@ -178,15 +186,16 @@ def init_db():
             );
         """)
         conn.commit()
-        logging.info("Database initialized successfully.")
-    except Exception as e:
-        logging.error(f"Database initialization error: {e}")
-    finally:
         cursor.close()
         conn.close()
+        logging.info("Database initialized successfully.")
+    except Exception as e:
+        logging.error(f"Database initialization deferred or failed: {e}")
 
-# Initialize DB on startup
-init_db()
+# Run DB init in a slightly safer way
+@app.on_event("startup")
+async def startup_event():
+    init_db()
 
 # — ENDPOINTS —
 
