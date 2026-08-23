@@ -59,15 +59,13 @@ def verify_password(password, stored_pass):
         return False
 
 def send_otp_email(target_email, otp):
-    # Port 465 is more reliable on Render than 587
     smtp_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
     smtp_port = int(os.getenv('SMTP_PORT', 465))
     sender_email = os.getenv('SENDER_EMAIL')
     sender_password = os.getenv('SENDER_APP_PASSWORD')
 
     if not sender_email or not sender_password:
-        logging.error("Email error: Credentials missing")
-        return False
+        return False, "SENDER_EMAIL or SENDER_APP_PASSWORD is not set in Render environment variables."
 
     sender_password = sender_password.replace(" ", "")
 
@@ -77,14 +75,15 @@ def send_otp_email(target_email, otp):
     msg['To'] = target_email
 
     try:
-        # Using SMTP_SSL for better compatibility on port 465
-        with smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=10) as server:
+        # Use SMTP_SSL for port 465
+        with smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=15) as server:
             server.login(sender_email, sender_password)
             server.send_message(msg)
-        return True
+        return True, "Success"
+    except smtplib.SMTPAuthenticationError:
+        return False, "Gmail Authentication Failed. Your App Password might be incorrect or expired."
     except Exception as e:
-        logging.error(f"Email error (Port {smtp_port}): {e}")
-        return False
+        return False, str(e)
 
 # — MODELS —
 
@@ -335,10 +334,11 @@ def forgot_password(req: OTPRequest):
     cursor.close()
     conn.close()
     
-    if send_otp_email(req.email, otp):
+    success, error_msg = send_otp_email(req.email, otp)
+    if success:
         return {"status": "success", "message": "OTP sent to your email"}
     else:
-        raise HTTPException(status_code=500, detail="Failed to send email. Check SMTP config.")
+        raise HTTPException(status_code=500, detail=f"Email Error: {error_msg}")
 
 @app.post("/api/reset-password-confirm/")
 def reset_password_confirm(req: PasswordResetConfirm):
