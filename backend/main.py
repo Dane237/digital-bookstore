@@ -59,19 +59,16 @@ def verify_password(password, stored_pass):
         return False
 
 def send_otp_email(target_email, otp):
+    # Port 465 is more reliable on Render than 587
     smtp_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
-    smtp_port = int(os.getenv('SMTP_PORT', 587))
+    smtp_port = int(os.getenv('SMTP_PORT', 465))
     sender_email = os.getenv('SENDER_EMAIL')
     sender_password = os.getenv('SENDER_APP_PASSWORD')
 
-    if not sender_email:
-        logging.error("Email error: SENDER_EMAIL missing")
-        return False
-    if not sender_password:
-        logging.error("Email error: SENDER_APP_PASSWORD missing")
+    if not sender_email or not sender_password:
+        logging.error("Email error: Credentials missing")
         return False
 
-    # Standardize password - remove spaces if they exist
     sender_password = sender_password.replace(" ", "")
 
     msg = MIMEText(f"Your PUC Bookstore Password Reset Code is: {otp}\n\nThis code expires in 10 minutes.")
@@ -80,13 +77,13 @@ def send_otp_email(target_email, otp):
     msg['To'] = target_email
 
     try:
-        with smtplib.SMTP(smtp_server, smtp_port, timeout=10) as server:
-            server.starttls()
+        # Using SMTP_SSL for better compatibility on port 465
+        with smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=10) as server:
             server.login(sender_email, sender_password)
             server.send_message(msg)
         return True
     except Exception as e:
-        logging.error(f"Email error: {e}")
+        logging.error(f"Email error (Port {smtp_port}): {e}")
         return False
 
 # — MODELS —
