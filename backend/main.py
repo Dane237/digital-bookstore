@@ -336,11 +336,20 @@ def forgot_password(req: OTPRequest):
     cursor.close()
     conn.close()
     
+    # FOR DEVELOPMENT: Print OTP to logs in case Render blocks SMTP
+    logging.info(f"🔑 SECURITY CODE FOR {req.email}: {otp}")
+    
     success, error_msg = send_otp_email(req.email, otp)
     if success:
         return {"status": "success", "message": "OTP sent to your email"}
     else:
-        raise HTTPException(status_code=500, detail=f"Email Error: {error_msg}")
+        # We still return success if we logged it, so you can test the app!
+        logging.warning(f"Email failed but OTP is logged: {error_msg}")
+        return {
+            "status": "success", 
+            "message": "Security code generated. (Check Render logs if email doesn't arrive)",
+            "dev_note": "SMTP is blocked by Render. Look at Render Dashboard Logs to find your code."
+        }
 
 @app.post("/api/reset-password-confirm/")
 def reset_password_confirm(req: PasswordResetConfirm):
