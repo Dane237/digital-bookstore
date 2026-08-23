@@ -76,9 +76,11 @@ def send_otp_email(target_email, otp):
 
     try:
         # Use SMTP_SSL for port 465
+        logging.info(f"Attempting to send email via {smtp_server}:{smtp_port} using SSL")
         with smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=15) as server:
             server.login(sender_email, sender_password)
             server.send_message(msg)
+        logging.info(f"Email sent successfully to {target_email}")
         return True, "Success"
     except smtplib.SMTPAuthenticationError:
         return False, "Gmail Authentication Failed. Your App Password might be incorrect or expired."
