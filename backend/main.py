@@ -81,12 +81,12 @@ def send_otp_email(target_email, otp):
     try:
         if smtp_port == 465:
             logging.info(f"Attempting to send email via {smtp_server}:{smtp_port} using SSL")
-            with smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=15) as server:
+            with smtplib.SMTP_SSL(smtp_server, smtp_port, timeout=10) as server:
                 server.login(sender_email, sender_password)
                 server.send_message(msg)
         else:
             logging.info(f"Attempting to send email via {smtp_server}:{smtp_port} using STARTTLS")
-            with smtplib.SMTP(smtp_server, smtp_port, timeout=15) as server:
+            with smtplib.SMTP(smtp_server, smtp_port, timeout=10) as server:
                 server.starttls()
                 server.login(sender_email, sender_password)
                 server.send_message(msg)
