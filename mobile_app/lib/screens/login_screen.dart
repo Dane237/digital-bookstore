@@ -92,11 +92,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 setDialogState(() => isRequesting = true);
                 try {
+                  print('Requesting OTP for: $email at ${ApiService.baseUrl}/forgot-password/');
                   final response = await http.post(
                     Uri.parse('${ApiService.baseUrl}/forgot-password/'),
                     headers: {'Content-Type': 'application/json'},
                     body: jsonEncode({'email': email}),
-                  );
+                  ).timeout(const Duration(seconds: 15));
                   
                   if (mounted) {
                     if (response.statusCode == 200) {
@@ -104,13 +105,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       _showOTPVerifyDialog(email);
                     } else {
                       setDialogState(() => isRequesting = false);
-                      final err = jsonDecode(response.body);
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${err['detail']}'), backgroundColor: Colors.red));
+                      String errorMsg = 'Server Error';
+                      try {
+                        final err = jsonDecode(response.body);
+                        errorMsg = err['detail'] ?? 'Unknown error';
+                      } catch (_) {
+                        errorMsg = 'Status ${response.statusCode}: ${response.reasonPhrase}';
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $errorMsg'), backgroundColor: Colors.red));
                     }
                   }
                 } catch (e) {
-                  setDialogState(() => isRequesting = false);
-                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                  print('Forgot Password Error: $e');
+                  if (mounted) {
+                    setDialogState(() => isRequesting = false);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red));
+                  }
                 }
               },
               child: isRequesting ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Send Code'),

@@ -3,7 +3,17 @@ import 'package:http/http.dart' as http;
 import '../models/book.dart';
 
 class ApiService {
-  static String get baseUrl => 'https://digital-bookstore-wm64.onrender.com/api';
+  // Toggle this to false if you are testing with a local backend
+  static const bool _useProduction = true;
+  
+  static String get baseUrl {
+    if (_useProduction) {
+      return 'https://digital-bookstore-wm64.onrender.com/api';
+    } else {
+      // 10.0.2.2 is the special alias to your host loopback interface in Android Emulator
+      return 'http://10.0.2.2:8000/api';
+    }
+  }
 
   Future<List<String>> fetchDepartments() async {
     try {
