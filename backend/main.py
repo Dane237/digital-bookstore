@@ -80,12 +80,12 @@ def send_otp_email(target_email, otp):
     msg['To'] = target_email
 
     try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
+        with smtplib.SMTP(smtp_server, smtp_port, timeout=10) as server:
             server.starttls()
             server.login(sender_email, sender_password)
             server.send_message(msg)
         return True
-    except smtplib.SMTPException as e:
+    except Exception as e:
         logging.error(f"Email error: {e}")
         return False
 
@@ -149,8 +149,21 @@ def get_db_connection():
         database=os.getenv('DB_NAME', 'puc_bookstore'),
         user=os.getenv('DB_USER', 'postgres'),
         password=os.getenv('DB_PASSWORD', 'pass123'),
-        port=os.getenv('DB_PORT', '5432')
+        port=os.getenv('DB_PORT', '5432'),
+        connect_timeout=5
     )
+
+@app.get("/api/health/")
+async def health_check():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
+        cursor.close()
+        conn.close()
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        return {"status": "unhealthy", "database": str(e)}
 
 def init_db():
     """Ensure required tables exist."""
