@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+
+# OS & IDE junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local build artifacts
+*.log
+tmp/
