@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PUC Digital Bookstore - Official Student Storefront</title>
+  <meta name="description" content="Paññāsāstra University of Cambodia (PUC) official digital bookstore platform. Search course textbooks, order online, and collect instantly via Digital Pickup PIN.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- QR Code Generator Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+</head>
+<body>
+
+  <!-- GLOBAL TOP HEADER NAVIGATION -->
+  <header class="header-nav">
+    <div class="nav-container">
+      <a href="#home" class="brand-logo" onclick="app.navigateTo('home')">
+        <img src="assets/images/puclogo.png" alt="PUC Logo" class="brand-logo-img" onerror="this.src='https://images.unsplash.com/photo-1532012197267-da84d127e765?w=64'">
+        <div class="brand-text">
+          <span class="brand-title">PUC DIGITAL</span>
+          <span class="brand-subtitle">BOOKSTORE</span>
+        </div>
+      </a>
+
+      <!-- Universal Search Field -->
+      <div class="search-wrapper">
+        <div class="search-input-container">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="globalSearchInput" class="search-input" placeholder="Search title, ISBN..." onkeyup="app.handleGlobalSearch(event)">
+          <button id="clearSearchBtn" class="clear-search-btn" style="display: none;" onclick="app.clearSearch()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <!-- Nav Items -->
+      <nav class="nav-links">
+        <a href="#home" class="nav-item active" id="navHome" onclick="app.navigateTo('home')">Home</a>
+        <a href="#my-orders" class="nav-item" id="navMyOrders" onclick="app.navigateTo('my-orders')">My Orders</a>
+        
+        <button class="cart-icon-btn" id="navCartBtn" onclick="app.navigateTo('cart')" title="Shopping Cart">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="cart-badge" id="cartBadgeCount">0</span>
+        </button>
+
+        <button class="user-nav-btn" id="navUserBtn" onclick="app.handleUserNavClick()">
+          <i class="fa-regular fa-user"></i>
+          <span id="userNavText">Login</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN DYNAMIC VIEWPORT CONTAINER -->
+  <main class="main-wrapper">
+
+    <!-- VIEW 1: HOME / BROWSE CATALOG (#home) -->
+    <section id="view-home" class="view-section active-view">
+      
+      <!-- Department Filter Chips Bar -->
+      <div class="filter-chips-container">
+        <div class="chips-scroll" id="departmentChips">
+          <!-- Dynamically populated department filter chips -->
+        </div>
+      </div>
+
+      <!-- Search Results Header (visible when searching) -->
+      <div id="searchResultsHeader" class="search-results-header" style="display: none;">
+        <h2 class="results-title">Results</h2>
+        <p id="searchResultsSub" class="results-sub">Showing matches found</p>
+      </div>
+
+      <!-- Book Grid Container -->
+      <div class="book-grid" id="homeBookGrid">
+        <!-- Dynamically rendered book cards -->
+      </div>
+    </section>
+
+    <!-- VIEW 2: BOOK DETAILS VIEW (#book-details) -->
+    <section id="view-book-details" class="view-section">
+      <div class="book-details-layout">
+        <div class="book-details-cover-box" id="detailCoverBox">
+          <img id="detailCoverImg" src="" alt="Book Cover" class="book-details-cover-img">
+        </div>
+
+        <div class="book-details-content">
+          <div class="details-top-tags">
+            <span id="detailCategoryBadge" class="details-category-badge">COMPUTER SCIENCE</span>
+            <span id="detailStockPill" class="stock-pill in-stock">• 12 in stock</span>
+          </div>
+
+          <h1 id="detailTitle" class="details-title">Textbook Title</h1>
+          <p id="detailAuthorLine" class="details-author-line">by Author Name</p>
+
+          <div class="details-price-section">
+            <div class="price-label">PRICE</div>
+            <div id="detailPrice" class="details-price">$0.00</div>
+          </div>
+
+          <div id="detailCartInfo" class="already-in-cart-notice" style="display: none;">
+            <i class="fa-solid fa-circle-info"></i> <span id="detailCartInfoText">1 item already in your cart</span>
+          </div>
+
+          <div class="details-description-box">
+            <h4 class="details-description-heading">Book Description</h4>
+            <p id="detailDescription" class="details-description-text">
+              Official PUC course textbook for the current semester.
+            </p>
+          </div>
+
+          <div class="details-action-row" id="detailActionRow">
+            <div class="form-group">
+              <span class="price-label" style="margin-bottom: 0.4rem;">QUANTITY</span>
+              <div class="quantity-stepper">
+                <button class="stepper-btn" onclick="app.adjustDetailQuantity(-1)">-</button>
+                <span class="stepper-val" id="detailQuantityVal">1</span>
+                <button class="stepper-btn" onclick="app.adjustDetailQuantity(1)">+</button>
+              </div>
+            </div>
+
+            <button class="btn-add-to-cart" id="detailAddToCartBtn" onclick="app.addDetailBookToCart()">
+              <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: SHOPPING CART (#cart) -->
+    <section id="view-cart" class="view-section">
+      <h1 class="cart-page-title" id="cartTitleText">My Cart (0 items)</h1>
+
+      <div class="cart-layout" id="cartLayout">
+        <div class="cart-items-column" id="cartItemsContainer">
+          <!-- Cart items list dynamically populated -->
+        </div>
+
+        <!-- Order Summary Card -->
+        <div class="summary-card" id="cartSummaryCard">
+          <h3 class="summary-card-title">Order Summary</h3>
+
+          <div class="summary-row total-row" style="border-top: none; margin-top: 0; padding-top: 0;">
+            <span>Total (USD)</span>
+            <span id="cartTotalVal" class="summary-total-price">$0.00</span>
+          </div>
+
+          <button class="btn-proceed-checkout" onclick="app.proceedToCheckout()">
+            Proceed to Checkout
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem;">
+        <button class="btn-continue-browsing" onclick="app.navigateTo('home')">
+          <i class="fa-solid fa-arrow-left"></i> Continue Browsing Textbooks
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 4: LOGIN (#login) -->
+    <section id="view-login" class="view-section">
+      <div class="auth-card-wrapper">
+        <div class="auth-icon-badge">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h2 class="auth-title">PUC Bookstore Portal</h2>
+        <p class="auth-sub">Enter your university credentials to continue</p>
+
+        <div class="auth-info-banner">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Login or create an account to complete your order and receive your secure pickup PIN.</span>
+        </div>
+
+        <div id="loginErrorAlert" class="auth-alert-box" style="display: none;"></div>
+
+        <form onsubmit="app.handleLoginSubmit(event)">
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">Student Email Address</label>
+            <input type="email" id="loginEmail" class="form-input" placeholder="dara.sok@student.puc.edu.kh" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.5rem;">
+            <label class="form-label">Password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="loginPassword" class="form-input" placeholder="••••••••••••" required>
+              <button type="button" class="toggle-password-btn" onclick="app.togglePasswordVisibility('loginPassword', this)">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div style="text-align: right; margin-bottom: 1.5rem;">
+            <button type="button" class="btn-text-link" onclick="app.openForgotPasswordModal()">Forgot Password?</button>
+          </div>
+
+          <button type="submit" class="btn-primary-action" id="loginSubmitBtn">
+            Login
+          </button>
+        </form>
+
+        <div class="auth-or-divider">
+          <span>OR</span>
+        </div>
+
+        <button type="button" class="btn-outline-action" onclick="app.navigateTo('register')">
+          Create Account
+        </button>
+
+        <p class="auth-footer-subnote">Browsing does not require login. Checkout requires login.</p>
+      </div>
+    </section>
+
+    <!-- VIEW 5: REGISTER (#register) -->
+    <section id="view-register" class="view-section">
+      <div class="auth-card-wrapper">
+        <div class="auth-icon-badge">
+          <i class="fa-regular fa-user"></i>
+        </div>
+        <h2 class="auth-title">Create Account</h2>
+        <p class="auth-sub">Join the official bookstore portal</p>
+
+        <div id="registerErrorAlert" class="auth-alert-box" style="display: none;"></div>
+
+        <form onsubmit="app.handleRegisterSubmit(event)">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="regName" class="form-input" placeholder="Dara Sok" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Student ID</label>
+            <input type="text" id="regStudentId" class="form-input" placeholder="2026-1234" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Student Email Address</label>
+            <input type="email" id="regEmail" class="form-input" placeholder="dara.sok@student.puc.edu.kh" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="regPassword" class="form-input" placeholder="Min. 6 characters" minlength="6" required>
+              <button type="button" class="toggle-password-btn" onclick="app.togglePasswordVisibility('regPassword', this)">
+                <i class="fa-regular fa-eye-slash"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label">Confirm Password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="regConfirmPassword" class="form-input" placeholder="Min. 6 characters" minlength="6" required>
+              <button type="button" class="toggle-password-btn" onclick="app.togglePasswordVisibility('regConfirmPassword', this)">
+                <i class="fa-regular fa-eye-slash"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary-action" id="registerSubmitBtn">
+            Create Account
+          </button>
+        </form>
+
+        <div class="auth-or-divider">
+          <span>OR</span>
+        </div>
+
+        <div class="auth-footer-link">
+          <span>Already have an account?</span>
+          <button type="button" class="btn-text-link" style="font-weight: 700;" onclick="app.navigateTo('login')">Login</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 6: CHECKOUT (#checkout) -->
+    <section id="view-checkout" class="view-section">
+      <h1 class="checkout-page-title">Secure Checkout</h1>
+
+      <div class="checkout-layout">
+        <!-- Left Column: Step Cards -->
+        <div class="checkout-steps-column">
+          <!-- Step 1: Student & Customer Info -->
+          <div class="checkout-step-card">
+            <div class="step-card-header">
+              <span class="step-num-badge">1</span>
+              <h3 class="step-title">Student & Customer Information</h3>
+            </div>
+            <div class="customer-info-grid">
+              <div>
+                <div class="info-label-sm">Full Name (English)</div>
+                <div class="info-val-bold" id="checkoutCustName">Dara Sok</div>
+              </div>
+              <div>
+                <div class="info-label-sm">PUC Student ID / Email</div>
+                <div class="info-val-bold" id="checkoutCustEmail">dara.sok@student.puc.edu.kh</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Pickup Method -->
+          <div class="checkout-step-card">
+            <div class="step-card-header">
+              <span class="step-num-badge">2</span>
+              <h3 class="step-title">Store Pickup Method</h3>
+            </div>
+            <div class="pickup-method-box active-pickup-box">
+              <div class="pickup-radio-dot"></div>
+              <div>
+                <div class="pickup-option-title">In-Store Pickup (Bookstore at Campus Building A, First Floor)</div>
+                <div class="pickup-option-sub">Your digital Pickup PIN will be shown instantly after payment success</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Order Items -->
+          <div class="checkout-step-card">
+            <div class="step-card-header">
+              <span class="step-num-badge">3</span>
+              <h3 class="step-title">Order Items</h3>
+            </div>
+            <div id="checkoutItemsList" class="checkout-items-list">
+              <!-- Dynamically populated items -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Payment Method Card -->
+        <div class="checkout-summary-column">
+          <div class="payment-method-card">
+            <h3 class="payment-card-title">Payment Method</h3>
+
+            <div class="payment-options-group">
+              <label class="payment-option-radio-card active">
+                <input type="radio" name="paymentMethod" value="Stripe Card" checked onchange="app.handlePaymentMethodChange(this)">
+                <div class="radio-circle"></div>
+                <div>
+                  <div class="pay-title">Secure Checkout via Stripe</div>
+                  <div class="pay-sub">Fast, secure checkout</div>
+                </div>
+              </label>
+
+              <label class="payment-option-radio-card">
+                <input type="radio" name="paymentMethod" value="ABA Bank QR" onchange="app.handlePaymentMethodChange(this)">
+                <div class="radio-circle"></div>
+                <div>
+                  <div class="pay-title">Mobile Banking Transfer</div>
+                  <div class="pay-sub">Link to your bank app</div>
+                </div>
+              </label>
+
+              <label class="payment-option-radio-card">
+                <input type="radio" name="paymentMethod" value="Pay at Counter" onchange="app.handlePaymentMethodChange(this)">
+                <div class="radio-circle"></div>
+                <div>
+                  <div class="pay-title">Direct Card Payment</div>
+                  <div class="pay-sub">Pay with Card</div>
+                </div>
+              </label>
+            </div>
+
+            <!-- Card Inputs Form (if needed) -->
+            <div id="cardInputsForm" class="card-form-grid" style="display: none;">
+              <div class="form-group full-width">
+                <label class="form-label">Card Number</label>
+                <input type="text" id="cardNumber" class="form-input" placeholder="4532 8912 3456 7890" maxlength="19">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Expiry Date</label>
+                <input type="text" id="cardExpiry" class="form-input" placeholder="12/28" maxlength="5">
+              </div>
+              <div class="form-group">
+                <label class="form-label">CVV</label>
+                <input type="password" id="cardCvv" class="form-input" placeholder="888" maxlength="4">
+              </div>
+            </div>
+
+            <div class="checkout-total-block">
+              <span>Total</span>
+              <span id="checkoutTotalVal" class="checkout-final-price">$0.00</span>
+            </div>
+
+            <button type="button" class="btn-primary-action" style="margin-top: 1rem;" onclick="app.processPaymentSubmission()">
+              Confirm & Pay
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 7: PROCESSING OVERLAY (#processing-overlay) -->
+    <div id="processingOverlay" class="processing-overlay" style="display: none;">
+      <div class="processing-card">
+        <div class="processing-shield-icon">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h2 class="processing-title">Processing Payment</h2>
+        <p class="processing-sub">Securely transaction and .generating your pickup PIN...</p>
+        
+        <div class="processing-summary-box">
+          <div class="p-row">
+            <span>Amount</span>
+            <span id="pAmountVal" class="p-val-bold">$18.00</span>
+          </div>
+          <div class="p-row">
+            <span>Method</span>
+            <span id="pMethodVal">Via Stripe</span>
+          </div>
+        </div>
+
+        <div class="processing-spinner-box">
+          <div class="radial-blue-spinner"></div>
+          <div class="spinner-text-bold">Please wait...</div>
+          <div class="spinner-subnote">Do not refresh this page or click the back button.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 8: ORDER SUCCESS / DIGITAL RECEIPT (#order-success) -->
+    <section id="view-order-success" class="view-section">
+      <!-- Top Success Alert Banner -->
+      <div class="payment-success-banner">
+        <div class="success-check-circle">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <div>
+          <h3 class="banner-title">Payment Successful</h3>
+          <p class="banner-sub">Your order has been paid. Find your digital Pickup PIN below.</p>
+        </div>
+      </div>
+
+      <!-- Receipt and Token Split Layout -->
+      <div class="receipt-token-grid">
+        <!-- Left: Order Details Box -->
+        <div class="order-details-box">
+          <h3 class="box-section-title">Order Details</h3>
+          <div class="r-row">
+            <span class="r-label">Order ID</span>
+            <span class="r-val-bold" id="sOrderId">PUC-ORD-1025</span>
+          </div>
+          <div class="r-row">
+            <span class="r-label">Status</span>
+            <span class="r-status-pill-paid">Paid</span>
+          </div>
+          <div class="r-row">
+            <span class="r-label">Method</span>
+            <span class="r-val" id="sMethod">Stripe</span>
+          </div>
+          <div class="r-row-total">
+            <span>Total Paid</span>
+            <span id="sTotalPaid" class="r-total-val">$18.00</span>
+          </div>
+        </div>
+
+        <!-- Right: Pickup Token Blue Card -->
+        <div class="pickup-token-blue-card">
+          <div class="token-top-label">YOUR PICKUP TOKEN</div>
+          <div class="qr-code-white-box">
+            <canvas id="successQrCanvas"></canvas>
+          </div>
+          <div id="sPickupPin" class="pickup-pin-large">482913</div>
+          <div class="token-bottom-note">Show this to bookstore staff</div>
+        </div>
+      </div>
+
+      <!-- Books in Order Box -->
+      <div class="books-in-order-box">
+        <h3 class="box-section-title">Books in This Pickup Order</h3>
+        <div id="sOrderItemsList" class="order-items-receipt-list">
+          <!-- Dynamically populated items -->
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="receipt-actions-row">
+        <button class="btn-outline-action" onclick="app.navigateTo('home')">
+          Back to Home
+        </button>
+        <button class="btn-primary-action" style="width: auto; padding: 0.85rem 1.8rem;" onclick="app.navigateTo('pickup-instructions')">
+          View Pickup Instructions
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 9: PICKUP INSTRUCTIONS (#pickup-instructions) -->
+    <section id="view-pickup-instructions" class="view-section">
+      <div class="instructions-card-wrapper">
+        <div class="inst-top-bar">
+          <div>
+            <div class="inst-tag-sm">INSTRUCTIONS FOR ORDER</div>
+            <h2 class="inst-order-id" id="instOrderId">PUC-ORD-1025</h2>
+          </div>
+          <span class="r-status-pill-paid">Paid</span>
+        </div>
+
+        <div class="inst-steps-list">
+          <div class="inst-step-row">
+            <span class="inst-step-badge">1</span>
+            <span>Go to PUC Bookstore</span>
+          </div>
+          <div class="inst-step-row">
+            <span class="inst-step-badge">2</span>
+            <span>Show your unique QR Code or PIN</span>
+          </div>
+          <div class="inst-step-row">
+            <span class="inst-step-badge">3</span>
+            <span>Staff will verify and hand over books</span>
+          </div>
+        </div>
+
+        <div class="inst-warning-box">
+          <i class="fa-solid fa-triangle-exclamation warning-icon"></i>
+          <span>Do not share your pickup PIN with anyone else. It is used to verify ownership.</span>
+        </div>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+          <button class="btn-primary-action" style="max-width: 240px;" onclick="app.openFullscreenTokenModal()">
+            Show Pickup PIN
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 10: MY ORDERS (#my-orders) -->
+    <section id="view-my-orders" class="view-section">
+      <div class="my-orders-header">
+        <h1 class="page-title">My Orders</h1>
+      </div>
+
+      <div id="ordersListContainer" class="my-orders-sections">
+        <!-- Dynamically rendered current and past orders -->
+      </div>
+    </section>
+
+    <!-- VIEW 11: ORDER DETAIL (#order-detail) -->
+    <section id="view-order-detail" class="view-section">
+      <div class="back-nav-bar">
+        <button class="btn-back-link" onclick="app.navigateTo('my-orders')">
+          <i class="fa-solid fa-arrow-left"></i> Back to My Orders
+        </button>
+      </div>
+
+      <div class="order-detail-container" id="orderDetailContent">
+        <!-- Dynamically rendered order detail content -->
+      </div>
+    </section>
+
+    <!-- VIEW 12: ACCOUNT (#account) -->
+    <section id="view-account" class="view-section">
+      <h1 class="account-page-title">Account</h1>
+
+      <div class="account-grid-layout">
+        <!-- Left: User Profile Box -->
+        <div class="profile-card-left">
+          <div class="avatar-blue-circle" id="userAvatarChar">DS</div>
+          <h2 class="profile-user-name" id="accFullName">Dara Sok</h2>
+          <p class="profile-user-email" id="accEmail">dara.sok@student.puc.edu.kh</p>
+
+          <div class="profile-notice-box">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Always use your official Student ID at the bookstore to match the digital pickup code on your receipts.</span>
+          </div>
+        </div>
+
+        <!-- Right: Preferences & Settings Card List -->
+        <div class="preferences-card-right">
+          <h3 class="pref-card-title">Account Information & Preferences</h3>
+
+          <div class="pref-list">
+            <div class="pref-item">
+              <div class="pref-icon-box"><i class="fa-regular fa-id-card"></i></div>
+              <div class="pref-item-content">
+                <div class="pref-item-title">Student ID</div>
+                <div class="pref-item-sub" id="accStudentIdDisplay">2026-1234</div>
+              </div>
+              <i class="fa-solid fa-chevron-right pref-arrow"></i>
+            </div>
+
+            <div class="pref-item" onclick="app.openEditProfileModal()">
+              <div class="pref-icon-box"><i class="fa-regular fa-user"></i></div>
+              <div class="pref-item-content">
+                <div class="pref-item-title">Edit Profile</div>
+                <div class="pref-item-sub">Update email, name, and notifications preferences</div>
+              </div>
+              <i class="fa-solid fa-chevron-right pref-arrow"></i>
+            </div>
+
+            <div class="pref-item" onclick="app.navigateTo('my-orders')">
+              <div class="pref-icon-box"><i class="fa-solid fa-box-archive"></i></div>
+              <div class="pref-item-content">
+                <div class="pref-item-title">Order History</div>
+                <div class="pref-item-sub">View all past purchases, active digital PINs, and receipts</div>
+              </div>
+              <i class="fa-solid fa-chevron-right pref-arrow"></i>
+            </div>
+
+            <div class="pref-item" onclick="app.showToast('Student Support Desk: support@puc.edu.kh')">
+              <div class="pref-icon-box"><i class="fa-regular fa-circle-question"></i></div>
+              <div class="pref-item-content">
+                <div class="pref-item-title">Help & Support</div>
+                <div class="pref-item-sub">Frequently asked questions and student support desk</div>
+              </div>
+              <i class="fa-solid fa-chevron-right pref-arrow"></i>
+            </div>
+
+            <div class="pref-item" onclick="app.openAboutModal()">
+              <div class="pref-icon-box"><i class="fa-solid fa-circle-info"></i></div>
+              <div class="pref-item-content">
+                <div class="pref-item-title">About PUC Bookstore</div>
+                <div class="pref-item-sub">App version 2.4.1 — Campus Bookstore Policies</div>
+              </div>
+              <i class="fa-solid fa-chevron-right pref-arrow"></i>
+            </div>
+
+            <div class="pref-item logout-pref-item" onclick="app.handleLogout()">
+              <div class="pref-icon-box text-red"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
+              <div class="pref-item-content">
+                <div class="pref-item-title text-red">Logout</div>
+              </div>
+              <i class="fa-solid fa-chevron-right pref-arrow"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 13: MANAGER DASHBOARD (#manager-dashboard) -->
+    <section id="view-manager-dashboard" class="view-section">
+      <div class="back-nav-bar">
+        <button class="btn-back-link" onclick="app.navigateTo('account')">
+          <i class="fa-solid fa-arrow-left"></i> Back to Account
+        </button>
+      </div>
+
+      <div class="manager-container">
+        <div class="manager-header">
+          <h1 class="page-title"><i class="fa-solid fa-user-shield"></i> Manager Dashboard</h1>
+          <p class="manager-sub">Manage store inventory, verify pickup PINs, scan student QR tokens, and inspect sales metrics.</p>
+        </div>
+
+        <!-- Analytics Overview Cards -->
+        <div class="analytics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+          <div class="stat-card" style="background: white; padding: 1.25rem; border-radius: 12px; border: 1px solid var(--gray-200); text-align: center;">
+            <i class="fa-solid fa-sack-dollar" style="font-size: 1.8rem; color: var(--success-green); margin-bottom: 0.5rem;"></i>
+            <div style="font-size: 0.8rem; color: var(--gray-500); text-transform: uppercase; font-weight: 700;">Total Revenue</div>
+            <div id="statTotalRevenue" style="font-size: 1.5rem; font-weight: 800; color: var(--primary-navy);">$0.00</div>
+          </div>
+          <div class="stat-card" style="background: white; padding: 1.25rem; border-radius: 12px; border: 1px solid var(--gray-200); text-align: center;">
+            <i class="fa-solid fa-vault" style="font-size: 1.8rem; color: var(--primary-navy); margin-bottom: 0.5rem;"></i>
+            <div style="font-size: 0.8rem; color: var(--gray-500); text-transform: uppercase; font-weight: 700;">Business Worth</div>
+            <div id="statBusinessWorth" style="font-size: 1.5rem; font-weight: 800; color: var(--primary-navy);">$0.00</div>
+          </div>
+          <div class="stat-card" style="background: white; padding: 1.25rem; border-radius: 12px; border: 1px solid var(--gray-200); text-align: center;">
+            <i class="fa-solid fa-boxes-packing" style="font-size: 1.8rem; color: #f59e0b; margin-bottom: 0.5rem;"></i>
+            <div style="font-size: 0.8rem; color: var(--gray-500); text-transform: uppercase; font-weight: 700;">Total Orders</div>
+            <div id="statTotalOrders" style="font-size: 1.5rem; font-weight: 800; color: var(--primary-navy);">0</div>
+          </div>
+        </div>
+
+        <!-- Quick Staff Action Bar -->
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn-primary-action" style="flex: 1; min-width: 180px;" onclick="app.openPinVerificationModal()">
+            <i class="fa-solid fa-key"></i> Verify 6-Digit PIN
+          </button>
+          <button class="btn-outline-action" style="flex: 1; min-width: 180px; border-color: var(--primary-navy); color: var(--primary-navy);" onclick="app.openQrScannerModal()">
+            <i class="fa-solid fa-qrcode"></i> Scan QR Code
+          </button>
+          <button class="btn-outline-action" style="flex: 1; min-width: 180px;" onclick="app.openAddStaffModal()">
+            <i class="fa-solid fa-user-plus"></i> Add Staff Account
+          </button>
+        </div>
+
+        <div class="orders-tab-bar" style="margin-bottom: 1.5rem;">
+          <button class="order-tab-btn active" id="tabManagerOrders" onclick="app.switchManagerTab('orders')">
+            <i class="fa-solid fa-clipboard-list"></i> Pickup Orders Verification
+          </button>
+          <button class="order-tab-btn" id="tabManagerInventory" onclick="app.switchManagerTab('inventory')">
+            <i class="fa-solid fa-book"></i> Inventory & Stock Control
+          </button>
+        </div>
+
+        <!-- Manager Section 1: Orders Verification -->
+        <div id="managerOrdersSection" class="manager-section">
+          <div class="orders-tab-bar" style="margin-bottom: 1rem; overflow-x: auto; white-space: nowrap;">
+            <button class="order-tab-btn active" id="mgrTabAll" onclick="app.filterManagerOrdersByStatus('All')">
+              All Orders
+            </button>
+            <button class="order-tab-btn" id="mgrTabPending" onclick="app.filterManagerOrdersByStatus('Pending')">
+              Pending Orders
+            </button>
+            <button class="order-tab-btn" id="mgrTabReady" onclick="app.filterManagerOrdersByStatus('Ready for Pickup')">
+              Ready for Pickup
+            </button>
+            <button class="order-tab-btn" id="mgrTabPickedUp" onclick="app.filterManagerOrdersByStatus('Picked Up')">
+              Order History (Completed)
+            </button>
+            <button class="order-tab-btn" id="mgrTabCancelled" onclick="app.filterManagerOrdersByStatus('Cancelled')">
+              Cancelled
+            </button>
+          </div>
+
+          <div class="manager-search-box" style="margin-bottom: 1.5rem;">
+            <div class="search-input-container">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" id="managerOrderSearch" class="search-input" placeholder="Search by Pickup PIN (e.g. 482913) or Order ID..." onkeyup="app.filterManagerOrders()">
+            </div>
+          </div>
+
+          <div id="managerOrdersList" class="manager-orders-list">
+            <!-- Dynamically populated manager order cards -->
+          </div>
+        </div>
+
+        <!-- Manager Section 2: Inventory Control -->
+        <div id="managerInventorySection" class="manager-section" style="display: none;">
+          <div class="inventory-top-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <h3>Course Textbooks Catalog</h3>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn-outline-action" style="padding: 0.5rem 0.8rem; font-size: 0.85rem;" onclick="app.handleSeedDatabase()">
+                <i class="fa-solid fa-database"></i> Seed DB
+              </button>
+              <button class="btn-outline-action" style="padding: 0.5rem 0.8rem; font-size: 0.85rem; border-color: #ef4444; color: #ef4444;" onclick="app.handleWipeInventory()">
+                <i class="fa-solid fa-trash"></i> Wipe Catalog
+              </button>
+              <button class="btn-primary-action" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="app.openAddBookModal()">
+                <i class="fa-solid fa-plus"></i> Add New Book
+              </button>
+            </div>
+          </div>
+
+          <div id="managerInventoryGrid" class="manager-inventory-grid">
+            <!-- Dynamically populated inventory items -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MOBILE BOTTOM TAB NAVIGATION -->
+  <nav class="mobile-bottom-nav">
+    <a href="#home" class="mobile-nav-item active" id="mobNavHome" onclick="app.navigateTo('home')">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#cart" class="mobile-nav-item" id="mobNavCart" onclick="app.navigateTo('cart')">
+      <div class="mob-cart-icon-wrapper">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span class="cart-badge" id="mobCartBadgeCount">0</span>
+      </div>
+      <span>Cart</span>
+    </a>
+    <a href="#my-orders" class="mobile-nav-item" id="mobNavOrders" onclick="app.navigateTo('my-orders')">
+      <i class="fa-solid fa-box-archive"></i>
+      <span>Orders</span>
+    </a>
+    <a href="#account" class="mobile-nav-item" id="mobNavAccount" onclick="app.navigateTo('account')">
+      <i class="fa-solid fa-user"></i>
+      <span>Account</span>
+    </a>
+  </nav>
+
+  <!-- MODALS -->
+
+  <!-- 1. FULLSCREEN QR / PIN MODAL -->
+  <div id="qrPinModal" class="modal-overlay">
+    <div class="modal-card token-modal-card">
+      <button class="modal-close-btn" onclick="app.closeModal('qrPinModal')">&times;</button>
+      <h3 class="modal-title">Campus Pickup Token</h3>
+      <p class="modal-sub">Show this screen to the bookstore counter staff</p>
+
+      <div class="qr-canvas-wrapper modal-qr-box">
+        <canvas id="modalQrCanvas"></canvas>
+      </div>
+      
+      <div id="modalPinDisplay" class="pickup-pin-display modal-pin">482913</div>
+      
+      <div class="modal-info-row">
+        <span>Order Reference: <strong id="modalOrderRef">PUC-ORD-1001</strong></span>
+      </div>
+
+      <button class="btn-primary-action" style="margin-top: 1.5rem;" onclick="app.closeModal('qrPinModal')">
+        Close Window
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. ABA KHQR PAYMENT MODAL -->
+  <div id="khqrModal" class="modal-overlay">
+    <div class="modal-card" style="text-align: center; max-width: 400px;">
+      <button class="modal-close-btn" onclick="app.closeModal('khqrModal')">&times;</button>
+      <div style="background-color: #d0021b; color: white; padding: 0.75rem; border-radius: 8px; font-weight: 800; letter-spacing: 1px; margin-bottom: 1rem;">
+        <i class="fa-solid fa-qrcode"></i> ABA KHQR PAY
+      </div>
+      <h3 class="modal-title">Scan KHQR to Pay</h3>
+      <p class="modal-sub" style="margin-bottom: 1rem;">Open ABA Mobile app & scan QR code</p>
+
+      <div class="qr-canvas-wrapper" style="background: white; border: 2px dashed #d0021b; padding: 1rem; border-radius: 12px; display: inline-block;">
+        <canvas id="khqrCanvas" style="width: 200px; height: 200px;"></canvas>
+      </div>
+
+      <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-navy); margin-top: 0.75rem;" id="khqrAmount">$0.00</div>
+      <div style="font-size: 0.85rem; color: var(--gray-500);">Merchant: PUC Digital Bookstore</div>
+
+      <div style="margin: 1rem 0; font-family: monospace; font-size: 1.1rem; color: #d0021b; font-weight: 700;">
+        Time Remaining: <span id="khqrTimer">05:00</span>
+      </div>
+
+      <button class="btn-primary-action" style="background-color: #d0021b; width: 100%;" onclick="app.confirmKhqrPayment()">
+        I Have Completed Payment ✅
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. FORGOT PASSWORD OTP MODAL -->
+  <div id="forgotPasswordModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="app.closeModal('forgotPasswordModal')">&times;</button>
+      
+      <!-- Step 1: Request OTP -->
+      <div id="fpStep1">
+        <h3 class="modal-title">Forgot Password</h3>
+        <p class="modal-sub">Enter your registered email to receive a 6-digit verification code.</p>
+
+        <div id="fpStep1Alert" class="auth-alert-box" style="display: none;"></div>
+
+        <form onsubmit="app.handleRequestOtp(event)">
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="fpEmail" class="form-input" placeholder="dara.sok@student.puc.edu.kh" required>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+            <button type="button" class="btn-outline-action" style="width: auto;" onclick="app.closeModal('forgotPasswordModal')">Cancel</button>
+            <button type="submit" class="btn-primary-action" style="width: auto;" id="btnSendOtp">Send Code</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Step 2: Confirm OTP & Reset Password -->
+      <div id="fpStep2" style="display: none;">
+        <h3 class="modal-title">Verify Code</h3>
+        <p class="modal-sub">Enter the 6-digit code sent to <strong id="fpTargetEmail"></strong></p>
+
+        <div id="fpStep2Alert" class="auth-alert-box" style="display: none;"></div>
+
+        <form onsubmit="app.handleConfirmResetPassword(event)">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">6-Digit Code</label>
+            <input type="text" id="fpOtpCode" class="form-input" style="font-family: var(--font-mono); font-size: 1.2rem; letter-spacing: 4px; text-align: center;" placeholder="123456" maxlength="6" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label class="form-label">New Password</label>
+            <input type="password" id="fpNewPassword" class="form-input" placeholder="Min 6 characters" minlength="6" required>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+            <button type="button" class="btn-outline-action" style="width: auto;" onclick="app.closeModal('forgotPasswordModal')">Cancel</button>
+            <button type="submit" class="btn-primary-action" style="width: auto; background-color: var(--success-green);" id="btnResetConfirm">Reset Password</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ABOUT PUC BOOKSTORE MODAL -->
+  <div id="aboutModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 500px;">
+      <button class="modal-close-btn" onclick="app.closeModal('aboutModal')">&times;</button>
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <img src="assets/images/puclogo.png" alt="PUC Logo" style="width: 40px; height: 40px; object-fit: contain;">
+        <div>
+          <h3 class="modal-title" style="font-size: 1.2rem;">About PUC Digital Bookstore</h3>
+          <div style="font-size: 0.8rem; color: var(--gray-500);">Official Storefront Platform v2.4.1</div>
+        </div>
+      </div>
+      
+      <div style="font-size: 0.9rem; color: var(--gray-700); line-height: 1.6; margin-bottom: 1.5rem;">
+        <p style="margin-bottom: 0.75rem;">Paññāsāstra University of Cambodia (PUC) Digital Bookstore enables students to browse official academic course textbooks, place secure orders online, and collect physical textbooks instantly using digital 6-digit Pickup PIN codes.</p>
+        <p style="margin-bottom: 0.75rem;"><strong>Pickup Location:</strong> Main Campus Building A, First Floor Counter</p>
+        <p style="margin-bottom: 0.75rem;"><strong>Pickup Hours:</strong> Mon - Fri 8:00 AM - 5:00 PM | Sat 8:00 AM - 12:00 PM</p>
+        <p><strong>Support Email:</strong> <a href="mailto:support@puc.edu.kh" style="color: var(--primary-navy); text-decoration: underline;">support@puc.edu.kh</a></p>
+      </div>
+
+      <button class="btn-primary-action" onclick="app.closeModal('aboutModal')">
+        Got It
+      </button>
+    </div>
+  </div>
+
+  <!-- 5. EDIT PROFILE MODAL -->
+  <div id="editProfileModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="app.closeModal('editProfileModal')">&times;</button>
+      <h3 class="modal-title">Edit Profile</h3>
+      <p class="modal-sub">Update your account information</p>
+
+      <form onsubmit="app.handleEditProfileSubmit(event)">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="editName" class="form-input" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Student ID</label>
+          <input type="text" id="editStudentId" class="form-input" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="editEmail" class="form-input" required readonly style="background: var(--gray-100);">
+        </div>
+        <button type="submit" class="btn-primary-action">Save Profile</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. ADD / EDIT BOOK MODAL WITH ISBN LOOKUP -->
+  <div id="addBookModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 500px;">
+      <button class="modal-close-btn" onclick="app.closeModal('addBookModal')">&times;</button>
+      <h3 class="modal-title" id="bookModalTitle">Add Course Textbook</h3>
+      
+      <!-- ISBN Lookup Tool -->
+      <div style="background-color: var(--primary-navy-light); padding: 0.8rem; border-radius: 8px; margin: 1rem 0; border: 1px solid var(--gray-200);">
+        <label class="form-label" style="margin-bottom: 0.3rem;"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Fetch Metadata by ISBN</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="isbnFetchInput" class="form-input" placeholder="e.g. 9780134685991">
+          <button type="button" class="btn-primary-action" style="white-space: nowrap; width: auto; padding: 0.5rem 0.8rem;" onclick="app.handleFetchIsbnMetadata()">
+            Fetch Info
+          </button>
+        </div>
+      </div>
+
+      <form onsubmit="app.handleAddBookSubmit(event)">
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label class="form-label">ISBN</label>
+          <input type="text" id="newBookIsbn" class="form-input" placeholder="978-0-123456-47-1" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label class="form-label">Title</label>
+          <input type="text" id="newBookTitle" class="form-input" placeholder="Textbook Title" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label class="form-label">Author</label>
+          <input type="text" id="newBookAuthor" class="form-input" placeholder="Author Name" required>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
+          <div class="form-group">
+            <label class="form-label">Price ($)</label>
+            <input type="number" step="0.01" id="newBookPrice" class="form-input" placeholder="25.00" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Stock Quantity</label>
+            <input type="number" id="newBookStock" class="form-input" placeholder="50" required>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label class="form-label">Department</label>
+          <input type="text" id="newBookDept" class="form-input" placeholder="Computer Science & Tech" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label class="form-label">Description</label>
+          <textarea id="newBookDesc" class="form-input" rows="2" placeholder="Course textbook overview..."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.2rem;">
+          <label class="form-label">Cover Image URL</label>
+          <input type="url" id="newBookCover" class="form-input" placeholder="https://images.unsplash.com/...">
+        </div>
+        <button type="submit" class="btn-primary-action" style="width: 100%;">Save Book</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. PIN VERIFICATION MODAL -->
+  <div id="pinVerifyModal" class="modal-overlay">
+    <div class="modal-card" style="text-align: center; max-width: 400px;">
+      <button class="modal-close-btn" onclick="app.closeModal('pinVerifyModal')">&times;</button>
+      <h3 class="modal-title"><i class="fa-solid fa-key"></i> Verify Pickup PIN</h3>
+      <p class="modal-sub">Enter student 6-digit PIN to process pickup</p>
+
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <input type="text" id="pinInputVerify" class="form-input" style="font-family: var(--font-mono); font-size: 1.5rem; letter-spacing: 6px; text-align: center;" placeholder="482913" maxlength="6">
+      </div>
+
+      <button class="btn-primary-action" style="width: 100%;" onclick="app.verifyPinCode()">
+        Verify PIN & View Order
+      </button>
+    </div>
+  </div>
+
+  <!-- 8. QR CODE SCANNER SIMULATION MODAL -->
+  <div id="qrScannerModal" class="modal-overlay">
+    <div class="modal-card" style="text-align: center; max-width: 420px;">
+      <button class="modal-close-btn" onclick="app.closeModal('qrScannerModal')">&times;</button>
+      <h3 class="modal-title"><i class="fa-solid fa-qrcode"></i> Campus QR Scanner</h3>
+      <p class="modal-sub">Scan student digital receipt QR code to verify pickup token</p>
+
+      <div style="background-color: black; border-radius: 12px; height: 180px; display: flex; align-items: center; justify-content: center; position: relative; margin: 1rem 0; overflow: hidden;">
+        <i class="fa-solid fa-camera fa-2x" style="color: white; opacity: 0.5;"></i>
+        <div style="position: absolute; width: 120px; height: 120px; border: 2px dashed #00ff88; border-radius: 8px;"></div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label class="form-label">Simulate Scanned QR Code / PIN</label>
+        <input type="text" id="qrScanSimInput" class="form-input" style="font-family: var(--font-mono); font-size: 1.2rem; letter-spacing: 4px; text-align: center;" placeholder="e.g. 482913" maxlength="6">
+      </div>
+
+      <button class="btn-primary-action" style="width: 100%;" onclick="app.processScannedPin()">
+        Verify PIN / QR Token
+      </button>
+    </div>
+  </div>
+
+  <!-- 9. STAFF REGISTRATION MODAL WITH SECRET PASSCODE -->
+  <div id="addStaffModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="app.closeModal('addStaffModal')">&times;</button>
+      <h3 class="modal-title">Create Staff Account</h3>
+      <p class="modal-sub">Register campus bookstore counter staff</p>
+
+      <form onsubmit="app.handleRegisterStaffSubmit(event)" style="margin-top: 1rem;">
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="staffName" class="form-input" placeholder="e.g. Counter Staff 1" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label class="form-label">Staff Email</label>
+          <input type="email" id="staffEmail" class="form-input" placeholder="e.g. staff1@puc.edu.kh" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label class="form-label">Employee ID</label>
+          <input type="text" id="staffEmployeeId" class="form-input" placeholder="PUC-STF-101" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label class="form-label">Password</label>
+          <input type="password" id="staffPassword" class="form-input" placeholder="••••••••" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.2rem;">
+          <label class="form-label">Staff Passcode</label>
+          <input type="password" id="staffSecretCode" class="form-input" placeholder="Enter PUC-STAFF-2026" required>
+        </div>
+        <button type="submit" class="btn-primary-action" style="width: 100%;">Create Staff Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- GLOBAL FOOTER -->
+  <footer class="footer-dark">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="footer-brand-title">
+          <img src="assets/images/puclogo.png" alt="PUC Logo" style="width: 32px; height: 32px; object-fit: contain; margin-right: 0.5rem;" onerror="this.src='https://images.unsplash.com/photo-1532012197267-da84d127e765?w=32'">
+          PUC Digital Bookstore
+        </div>
+        <p class="footer-brand-desc">Providing official academic textbooks for students at PUC</p>
+      </div>
+
+      <div>
+        <h4 class="footer-col-title">Pickup Hours</h4>
+        <ul class="footer-links-list" style="color: var(--gray-400);">
+          <li>Mon - Fri: 8:00 AM - 5:00 PM</li>
+          <li>Sat: 8:00 AM - 12:00 PM</li>
+          <li>Campus Building A, First Floor</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 PUC. All rights reserved.</span>
+      <span>Phnom Penh, Cambodia</span>
+    </div>
+  </footer>
+
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- APPLICATION LOGIC -->
+  <script src="js/app.js"></script>
+</body>
+</html>

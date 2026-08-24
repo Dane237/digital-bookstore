@@ -1,0 +1,21 @@
+{
+  "name": "puc-digital-bookstore",
+  "version": "1.0.0",
+  "description": "Paññāsāstra University of Cambodia (PUC) Digital Bookstore Management System - Storefront Level 1",
+  "main": "index.html",
+  "scripts": {
+    "start": "python server.py",
+    "dev": "python server.py 8000",
+    "test": "python -c \"import os; assert os.path.exists('index.html')\""
+  },
+  "keywords": [
+    "puc",
+    "digital-bookstore",
+    "cambodia",
+    "e-commerce",
+    "pickup-pin",
+    "stripe"
+  ],
+  "author": "PUC Software Engineering Group 5",
+  "license": "MIT"
+}
