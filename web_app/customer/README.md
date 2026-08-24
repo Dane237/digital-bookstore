@@ -1,102 +1,170 @@
-# PUC Digital Bookstore Management System — Full-Stack Web Application
+# 📚 PUC Digital Bookstore Management System — Web Customer Application
 
-Official Web Application for **Paññāsāstra University of Cambodia (PUC)** physical campus bookstore digitization.
+Official Web Application platform for **Paññāsāstra University of Cambodia (PUC)** campus bookstore digitization, featuring both the **Student Customer Storefront** and the **Staff Manager Control Center**.
 
----
-
-## 📌 Project Overview
-The **PUC Digital Bookstore System** is a full-stack student e-commerce platform for Paññāsāstra University of Cambodia (PUC).
-
-* **Customer Experience**: Students can search for required course materials by department or course code (e.g., `CS301`, `CS202`), view textbook details, add items to cart, register a student account (enforcing PBKDF2 SHA-256 password security), complete payment via ABA Mobile Banking / Stripe, and receive a **Digital Receipt with a unique 6-Digit Pickup PIN / QR Code** for physical collection at the PUC campus counter.
+🌐 **Live Production Deployment**: [https://charming-rugelach-827e8e.netlify.app/](https://charming-rugelach-827e8e.netlify.app/)
 
 ---
 
-## 📁 Repository Directory Structure
+## 📌 System Overview
+
+The **PUC Digital Bookstore Web Application** is a full-stack e-commerce and bookstore management system designed for Paññāsāstra University of Cambodia (PUC).
+
+* **Student Customer Storefront**: Students can browse and search course materials by department or keyword, inspect live stock levels, manage shopping carts, register/login securely with PBKDF2 SHA-256 encryption, checkout using Stripe, ABA Bank KHQR, or Direct Card, and receive a **Digital Receipt with a unique 6-Digit Pickup PIN & scannable HTML5 Canvas QR Code** for physical collection at PUC Campus Building A.
+* **Staff Manager Control Center**: Authorized staff and managers can access the integrated **Manager Dashboard** (`#manager-dashboard`) to verify 6-digit pickup PINs, scan student QR tokens, inspect real-time sales analytics (Total Revenue, Business Worth, Total Orders), manage order fulfillment states (`Pending`, `Ready for Pickup`, `Picked Up`), register counter staff accounts, and manage textbook inventory.
+
+---
+
+## 📁 Repository Directory Structure (`web_app/customer/`)
 
 ```text
-PUC Digital Bookstore/
-├── index.html                   # Primary HTML5 application viewport (Student Storefront Views)
-├── server.py                    # Full-Stack Python REST API server with security hashing
-├── db_adapter.py                # Dual SQLite3 & PostgreSQL Database Adapter
-├── init_db.py                   # Production Database Schema Creator
-├── reset_clean_db.py            # 1-Click Clean Empty Database Reset Tool
-├── migrate_to_postgres.py       # 1-Click PostgreSQL Migration Utility
-├── puc_bookstore.db             # Relational Database file
-├── README.md                    # Project documentation & testing guide
+web_app/customer/
+├── index.html                   # Single Page Application (Student Storefront & Staff Manager Dashboard)
+├── server.py                    # Python REST API server (Flask/HTTP) with security & PIN generation
+├── db_adapter.py                # Dual PostgreSQL (Render Cloud) & SQLite3 Database Adapter
+├── init_db.py                   # Relational Database Schema Creator
+├── reset_clean_db.py            # Clean Database Reset Utility
+├── migrate_to_postgres.py       # PostgreSQL Cloud Migration Script
+├── puc_bookstore.db             # Local Relational SQLite Database file
+├── package.json                 # Project npm scripts & metadata
+├── README.md                    # Detailed Web Application documentation
 │
 ├── css/
-│   └── styles.css               # PUC Design System & UI stylesheet
+│   └── styles.css               # PUC Modern Design System & CSS Stylesheet
 │
 ├── js/
-│   ├── app.js                   # Application router, REST API handlers & PIN canvas engine
+│   ├── app.js                   # Application Router, REST API Client, Cart, Checkout, QR/PIN Engine, & Manager Dashboard
 │   └── data/
-│       └── booksData.js         # Catalog initial state module
+│       └── booksData.js         # Initial catalog seed data module
 │
 └── assets/
     └── images/
-        └── puclogo.png          # Official PUC University Emblem Logo
+        └── puclogo.png          # Official PUC University Logo
 ```
 
 ---
 
-## ⚡ Quick Start & Development Server
+## 🚀 Quick Start & Local Development
 
-### Run Dev Server
+### 1. Launch Dev Server
 ```bash
+# Navigate to the web app customer directory
+cd web_app/customer
+
+# Launch development server
 python server.py 8000
 ```
 
-Access the application live in your browser at:  
+Access the local web application at:  
 👉 **`http://localhost:8000`**
 
----
-
-## 🧪 Student Customer Storefront Guidelines
-1. **Catalog Browsing**: Students navigate to `http://localhost:8000` to view live textbooks.
-2. **Academic Filters**: Filter catalog by Department dropdown or Course Code search (e.g. `CS301`, `CS202`).
-3. **Mandatory Account Registration**: Adding a textbook to cart and clicking **"Proceed to Checkout"** enforces mandatory authentication. Access is strictly blocked until students sign in or create an account.
-4. **PBKDF2 SHA-256 Security**: When students register, their password is encrypted using PBKDF2 SHA-256 with 100,000 hashing rounds + salt before saving to `users` table.
-5. **Digital Receipt & 6-Digit Pickup PIN**: After selecting ABA Mobile Banking or Credit Card payment, students receive a digital receipt containing a unique **6-Digit Pickup PIN** (e.g., `482913`) and an HTML5 Canvas QR Code.
+### 2. Live Cloud URL
+👉 **[https://charming-rugelach-827e8e.netlify.app/](https://charming-rugelach-827e8e.netlify.app/)**
 
 ---
 
-## 🚀 Key Functional Features
+## 🎨 Storefront UI Workflows & Screen Documentation
 
-1. **Academic Course Search & Filter:** Filter textbooks by Department (Computer Science, Business, IT), Course Code (`CS101`, `CS201`, `CS202`, `CS301`, `CS302`, `CS303`), and In Stock status.
-2. **Interactive Book Details:** High-res textbook artwork, stock status pill, student price calculation, and quantity steppers (`- 1 +`).
-3. **Session Cart & Order Breakdown:** Live subtotal calculation, administrative processing fee breakdown (`$0.50`), line item modification, and trash deletion.
-4. **Mandatory Authentication Flow:** User registration & login interface enforcing PBKDF2 SHA-256 password hashing. Every student must register to purchase books.
-5. **Secure Checkout & Stripe Gateway:** Multi-step checkout selecting pickup method, payment option (Mobile Banking vs Credit Card), and payment authorization simulation.
-6. **Digital Receipt & 6-Digit Pickup PIN Engine:** Generates a unique 6-digit PIN (e.g. `482913`) and renders a **scannable QR Code canvas** for campus bookstore verification.aphs** (Chart.js Bar & Doughnut charts). Student accounts (`role: 'customer'`) are strictly blocked from accessing staff views and API endpoints.
+The application consists of **13 primary UI screens and interactive modules**:
+
+| Screen # | Image Reference | UI Module / View | Feature & Capability Breakdown |
+| :--- | :--- | :--- | :--- |
+| **1** | `1. web-home-browse.png` | **Home Storefront Catalog (`#home`)** | Department filtering chips (Computer Science, Business, IT, etc.), hero section, dynamic book cards grid with stock indicators and pricing. |
+| **2** | `2. web-search-filter.png` | **Global Search & Filter Bar** | Instant header search input (Title, Author, ISBN, Course Code) with real-time match count results header. |
+| **3** | `3. web-book-details.png` | **Book Details View (`#book-details`)** | High-res cover artwork, category badge, real-time stock pill (`• X in stock`), student pricing, quantity stepper (`- 1 +`), full description, and "Add to Cart" CTA. |
+| **4** | `4. web-cart.png` | **Session Shopping Cart (`#cart`)** | Dynamic cart list, item quantity controls, single-click item removal, live subtotal, processing fee breakdown ($0.50), total amount, and checkout CTA. |
+| **5** | `5. web-login.png` | **Student Login Portal (`#login`)** | University student login interface, password visibility toggle, forgot password flow trigger, and link to account registration. |
+| **6** | `6. web-create-account.png` | **Create Student Account (`#register`)** | Registration form requiring Full Name, Student ID (PUC format), Email, and Password with PBKDF2 SHA-256 security. |
+| **7** | `7. web-checkout.png` | **Multi-Step Checkout (`#checkout`)** | 4-step order checkout: (1) Verified Student Info, (2) Store Pickup selection (Campus Building A), (3) Order Items breakdown, (4) Payment Selection (Stripe, ABA KHQR, Direct Card). |
+| **8** | `8. web-payment-processing.png` | **Payment Processing Overlay** | Animated security shield modal displaying real-time payment validation and automated 6-Digit PIN generation. |
+| **9** | `9. web-receipt-pickup-pin.png` | **Digital Receipt & Token (`#order-success`)** | Order confirmation page with `Paid` status, order number (`PUC-ORD-1025`), unique **6-Digit Pickup PIN** (`482913`), and scannable HTML5 Canvas QR Code. |
+| **10** | `10. web-pickup-instructions.png` | **Store Pickup Instructions** | Detailed pickup guidance: Main Campus Building A, 1st Floor Counter, Mon-Fri 8:00 AM - 5:00 PM, Sat 8:00 AM - 12:00 PM. |
+| **11** | `11. web-show-pickup-pin.png` | **Campus Pickup Token Screen** | Full-screen modal presenting student 6-Digit PIN and scannable QR code for physical bookstore counter validation. |
+| **12** | `12. web-my-orders.png` | **Student Order History (`#my-orders`)** | Complete order history with fulfillment status badges (`Paid`, `Ready for Pickup`, `Picked Up`), order details, and pickup PIN recovery. |
+| **13** | `13. web-account.png` | **Student Account Profile (`#account`)** | Student profile card, Student ID display, Edit Profile modal, Help & Support contacts (`support@puc.edu.kh`), and system info. |
 
 ---
 
-## 🔒 Security & Role-Based Access Control (RBAC)
+## 🧑‍💼 Staff Manager Control Center (`#manager-dashboard`)
 
-The application enforces strict multi-level role authorization:
+Authorized staff and managers can access the administrative dashboard directly in the Web Application:
 
-* **Customer / Student Accounts (`role: 'customer'`)**: Restricted to browsing course textbooks, adding to cart, checkout, payment processing, generating digital pickup PINs, and viewing personal order history (`#my-orders` / `#account`). Attempts to access `#staff-dashboard` are blocked with an access control error toast (`🔐 Access Denied: Staff/Admin credentials required`).
-* **Staff & Admin Accounts (`role: 'staff'`)**: Authorized to log into the Administrative Control Center (`admin@puc.edu.kh`), ingest new course materials, import ISBN metadata, verify customer 6-digit PINs, and inspect sales analytics.
-* **Backend API Protection**: Server endpoints (`/api/admin/*` and `/api/staff/*`) require valid session tokens associated with a staff/admin user account and return `HTTP 403 Forbidden` if invoked by unauthenticated or customer accounts.
+1. **Real-Time Sales Metrics**:
+   - **Total Revenue**: Cumulative revenue calculated across all completed orders.
+   - **Business Worth**: Estimated inventory valuation across active catalog titles.
+   - **Total Orders**: Live count of all customer purchase transactions.
+
+2. **6-Digit PIN Verification Tool**:
+   - Dedicated counter verification modal allowing staff to type a student's 6-digit PIN to lookup orders and process fulfillment.
+
+3. **QR Code Scanner Modal**:
+   - Camera/HTML5 QR code scanner modal to scan student digital receipt QR codes instantly at the counter.
+
+4. **Order Fulfillment Pipeline**:
+   - Order pipeline board categorized by status: `All`, `Pending`, `Ready for Pickup`, `Picked Up`.
+   - One-click status transitions to inform students when books are ready for counter collection.
+
+5. **Inventory & Stock Control**:
+   - Live inventory table with stock adjustment controls to update textbook quantities.
+
+6. **Staff Account Registration**:
+   - Register new campus counter staff using the secure `PUC-STAFF-2026` verification authorization code.
 
 ---
 
-## 🗄️ Database Options (Render Hosted PostgreSQL)
+## 🔒 Security Architecture
 
-The system connects directly to the production **Render Hosted PostgreSQL Database** shared with the Flutter Mobile App:
+* **PBKDF2 SHA-256 Hashing**: Password security enforced with **PBKDF2 SHA-256** using 100,000 iterations and a unique salt per account.
+* **Role-Based Access Control (RBAC)**:
+  * **Customer Accounts (`role: 'customer'`)**: Restricted to browsing catalog, shopping cart, checkout, receipt token generation, and personal order history.
+  * **Staff Accounts (`role: 'staff'`)**: Granted access to Manager Dashboard (`#manager-dashboard`), PIN verification, QR scanning, order status updates, and inventory management.
+* **Session Token Authentication**: Requests require valid token headers for protected staff and user operations.
 
-* **Production Render PostgreSQL**: Pass `DATABASE_URL` environment variable or rely on backend environment settings (`digital-bookstore-wm64.onrender.com`).
+---
+
+## 🗄️ Database Architecture
+
+The application includes a dual database layer powered by `db_adapter.py`:
+
+* **Cloud PostgreSQL (Production)**:
+  Connects to Render Hosted PostgreSQL (`digital-bookstore-wm64.onrender.com`). Set environment variable:
   ```bash
   $env:DATABASE_URL="postgresql://user:password@render-host.onrender.com/puc_bookstore"
   python server.py 8000
   ```
+* **Local SQLite3 (Offline Fallback)**:
+  Automatically uses `puc_bookstore.db` when offline or when `DATABASE_URL` is omitted.
+
+---
+
+## 🔌 Key REST API Endpoints (`server.py`)
+
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/books` | Fetch all course textbooks with stock status | Public |
+| `GET` | `/api/books/<id>` | Fetch detailed book information | Public |
+| `POST` | `/api/login` | User/Staff authentication | Public |
+| `POST` | `/api/register` | Student account registration | Public |
+| `POST` | `/api/forgot-password` | Request password reset verification code | Public |
+| `POST` | `/api/reset-password` | Submit new password with verification code | Public |
+| `POST` | `/api/orders` | Create new order & generate 6-Digit Pickup PIN | Authenticated |
+| `GET` | `/api/orders` | Fetch orders for current student or all (staff) | Authenticated |
+| `GET` | `/api/orders/<id>` | Fetch specific order receipt & PIN token | Authenticated |
+| `POST` | `/api/orders/verify-pin` | Verify student 6-digit pickup PIN | Staff Only |
+| `PUT` | `/api/orders/<id>/status` | Update order fulfillment status | Staff Only |
+| `POST` | `/api/staff/register` | Register new counter staff account | Staff Code Required |
 
 ---
 
 ## 🛠️ Technology Stack
-* **Frontend:** HTML5, Vanilla CSS3 (Custom PUC Design System), JavaScript (ES6 Modules & Dynamic DOM Router), QRious (HTML5 Canvas QR Generator).
-* **Backend:** Python Flask REST API (`server.py`) & Database Adapter (`db_adapter.py`).
-* **Database:** Render Hosted PostgreSQL (`https://digital-bookstore-wm64.onrender.com/api`).
-* **Security:** PBKDF2 SHA-256 password hashing (100,000 rounds + salt), session token authentication.
-* **Typography:** Google Fonts (`Inter`, `Outfit`, `JetBrains Mono`).
-* **Icons:** FontAwesome 6.4.0.
+
+* **Frontend**: HTML5, Vanilla CSS3 (Custom PUC Design System), Modern JavaScript (ES6 Modules, Dynamic View Router), QRious (HTML5 Canvas QR Code Engine).
+* **Backend Server**: Python REST API (`server.py`) & Dual Database Adapter (`db_adapter.py`).
+* **Database**: PostgreSQL (Render Cloud) / SQLite3 (`puc_bookstore.db` local).
+* **Security**: PBKDF2 SHA-256 Password Encryption (100,000 rounds), Session Token Authentication.
+* **Typography**: Google Fonts (`Inter`, `Outfit`, `JetBrains Mono`).
+* **Icons**: FontAwesome 6.4.0.
+
+---
+
+© 2026 Paññāsāstra University of Cambodia (PUC) - Digital Bookstore Project

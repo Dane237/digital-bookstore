@@ -1,31 +1,53 @@
-# PUC Bookstore ETL Pipeline
+# 📊 PUC Bookstore ETL Pipeline
 
-This pipeline extracts order data from the MySQL production database and uploads it to Amazon S3 as JSON Lines format for analytics processing.
+This pipeline extracts order and sales data from the **PostgreSQL** production database and uploads it to Amazon S3 in JSON Lines (`.jsonl`) format for analytics processing and data warehousing.
 
-## Setup
+---
 
-1.  **Dependencies**: Install the required Python packages.
-    ```bash
-    pip install -r requirements.txt
-    ```
+## ⚙️ Setup & Configuration
 
-2.  **Configuration**: Create a `.env` file (see `.env.example`) and add your database credentials and S3 bucket name.
+1. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-3.  **Database**: If you haven't set up the tables yet, run the `schema.sql` script in your MySQL instance.
-    ```bash
-    mysql -u root -p < schema.sql
-    ```
+2. **Environment Configuration**:
+   Create a `.env` file (see `.env.example`) and configure your PostgreSQL connection and S3 bucket details:
+   ```env
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=puc_bookstore
+   DB_USER=postgres
+   DB_PASSWORD=yourpassword
+   S3_BUCKET_NAME=your-s3-bucket-name
+   USE_MOCK=false
+   ```
 
-## Running the Pipeline
+3. **Database Schema**:
+   Ensure PostgreSQL tables are initialized using `database/schema.sql`.
 
-To run the pipeline manually:
+---
+
+## 🚀 Running the Pipeline
+
+To run the ETL extraction pipeline manually:
 ```bash
 python etl_pipeline.py
 ```
 
-### Mock Mode
-If you want to test the transformation and S3 upload without a live MySQL database, set `USE_MOCK=true` in your `.env` file.
+### 🧪 Mock & Development Mode
+If you don't have a live PostgreSQL database or AWS credentials configured, you can still test the pipeline:
+- **`USE_MOCK=true`**: Generates synthetic order data instead of querying the database.
+- **Local Fallback**: If AWS credentials are not found, the script will save the `.jsonl` file to a temporary directory on your machine instead of failing, allowing you to inspect the output.
 
-## Output Structure
-Data is uploaded to S3 with the following partition structure:
-`s3://{BUCKET_NAME}/raw/orders/year=YYYY/month=MM/orders_extract_YYYYMMDD.json`
+---
+
+## 📂 S3 Output Partition Structure
+
+Extracted data is formatted as JSON Lines and uploaded to S3 using hive-style date partitions for easy integration with AWS Athena or Spark:
+```text
+s3://{S3_BUCKET_NAME}/raw/orders/year=YYYY/month=MM/orders_extract_YYYYMMDD.json
+```
+
+---
+© 2026 PUC Digital Bookstore - Academic Project
