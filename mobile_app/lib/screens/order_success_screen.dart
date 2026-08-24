@@ -101,30 +101,6 @@ class OrderSuccessScreen extends StatelessWidget {
                       pickupPin,
                       style: const TextStyle(color: Colors.white, fontSize: 48, fontWeight: FontWeight.bold, letterSpacing: 8),
                     ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ShowPinScreen(
-                              orderId: orderId,
-                              pin: pickupPin,
-                              totalAmount: totalPaid,
-                              itemCount: items.length,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.qr_code_2),
-                      label: const Text('FULLSCREEN QR / PIN'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF003399),
-                        minimumSize: const Size.fromHeight(44),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                    ),
                     const SizedBox(height: 12),
                     const Text('Show this to bookstore staff', style: TextStyle(color: Colors.white60, fontSize: 12)),
                   ],

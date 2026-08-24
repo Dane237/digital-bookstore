@@ -33,9 +33,9 @@ This part of the ecosystem contains the **Flutter** mobile application for Stude
 
 ## 🔐 Credentials for Demo
 
-| Account Type | Email | Password |
-| :--- | :--- | :--- |
-| **Root Admin** | `vongchantha2001@gmail.com` | `pass123` |
+| Account Type | Email | Password         |
+| :--- | :--- |:-----------------|
+| **Root Admin** | `vongchantha2001@gmail.com` | `admin123`       |
 | **Staff Member** | Create via Dashboard | Assign via Admin |
 
 ---

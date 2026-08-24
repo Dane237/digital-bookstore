@@ -89,29 +89,6 @@ class OrderDetailScreen extends ConsumerWidget {
                     ],
                     const SizedBox(height: 16),
                     _buildPickupRow(Icons.location_on, 'Location', status == 'Ready for Pickup' ? 'Ready at ${order['prepared_location']}' : 'Preparing...'),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ShowPinScreen(
-                              orderId: orderIdStr,
-                              pin: pickupPin,
-                              totalAmount: double.tryParse(order['total_amount'].toString()) ?? 0.0,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.qr_code_2),
-                      label: const Text('SHOW TO STAFF'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF003399),
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size.fromHeight(50),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
                   ],
                 ),
               ),

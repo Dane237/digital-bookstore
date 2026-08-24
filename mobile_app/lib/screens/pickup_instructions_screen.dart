@@ -45,7 +45,7 @@ class PickupInstructionsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             
-            _buildStep(1, 'Go to the PUC Bookstore Counter'),
+            _buildStep(1, 'Go to the PUC Bookstore'),
             _buildStep(2, 'Show your unique QR Code or PIN'),
             _buildStep(3, 'Staff will verify and hand over books'),
             
