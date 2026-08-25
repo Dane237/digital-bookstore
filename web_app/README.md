@@ -2,7 +2,7 @@
 
 Official Web Application platform for **Paññāsāstra University of Cambodia (PUC)** digital campus bookstore system, designed exclusively for **Student Customers**.
 
-🌐 **Live Storefront Deployment**: [https://unrivaled-piroshki-69f896.netlify.app/](https://unrivaled-piroshki-69f896.netlify.app/)
+🌐 **Live Storefront Deployment**: [https://remarkable-hamster-4e03ad.netlify.app/](https://remarkable-hamster-4e03ad.netlify.app/)
 
 ---
 
@@ -12,7 +12,7 @@ The web application is located in **[`customer/`](./customer)** as a full-stack 
 
 | Directory | Description | Status | Live URL |
 | :--- | :--- | :--- | :--- |
-| **[`customer/`](./customer)** | Customer Web Application for **Student Customers**. Features course catalog search, shopping cart, checkout (Stripe/ABA/Card), 6-Digit Pickup PIN & QR token generation, and personal order tracking (`My Orders`). | 🚀 Production Ready | [Netlify App](https://unrivaled-piroshki-69f896.netlify.app/) |
+| **[`customer/`](./customer)** | Customer Web Application for **Student Customers**. Features course catalog search, shopping cart, checkout (Stripe/ABA/Card), 6-Digit Pickup PIN & QR token generation, and personal order tracking (`My Orders`). | 🚀 Production Ready | [Netlify App](https://remarkable-hamster-4e03ad.netlify.app/) |
 
 
 > [!NOTE]
@@ -36,7 +36,7 @@ Once started, open your browser and navigate to:
 👉 **`http://localhost:8000`**
 
 Or visit the live production app at:  
-👉 **[https://unrivaled-piroshki-69f896.netlify.app/](https://unrivaled-piroshki-69f896.netlify.app/)**
+👉 **[https://remarkable-hamster-4e03ad.netlify.app/](https://remarkable-hamster-4e03ad.netlify.app/)**
 
 ---
 

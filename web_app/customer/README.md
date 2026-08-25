@@ -2,7 +2,7 @@
 
 Official Web Application platform for **Paññāsāstra University of Cambodia (PUC)** campus bookstore digitization, designed exclusively for **Student Customers**.
 
-🌐 **Live Production Deployment**: [https://unrivaled-piroshki-69f896.netlify.app/](https://unrivaled-piroshki-69f896.netlify.app/)
+🌐 **Live Production Deployment**: [https://remarkable-hamster-4e03ad.netlify.app/](https://remarkable-hamster-4e03ad.netlify.app/)
 
 ---
 
@@ -58,7 +58,7 @@ Access the local web application at:
 👉 **`http://localhost:8000`**
 
 ### 2. Live Cloud URL
-👉 **[https://unrivaled-piroshki-69f896.netlify.app/](https://unrivaled-piroshki-69f896.netlify.app/)**
+👉 **[https://remarkable-hamster-4e03ad.netlify.app/](https://remarkable-hamster-4e03ad.netlify.app/)**
 
 
 ---
