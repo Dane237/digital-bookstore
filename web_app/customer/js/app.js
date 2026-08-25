@@ -901,9 +901,15 @@ class BookstoreApp {
         const items = o.items || [];
         const itemSummaryHtml = items.map(item => {
           const hasCover = item.cover_img && item.cover_img.trim();
+          const titleAbbr = this.escapeHtml((item.title || 'PUC').substring(0, 10));
           const coverHtml = hasCover
-            ? `<img src="${item.cover_img.trim()}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"><div style="display: none; width: 60px; height: 75px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; align-items: center; justify-content: center;"><div class="book-placeholder-icon" style="transform: scale(0.6);"></div></div>`
-            : `<div style="width: 60px; height: 75px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; display: flex; align-items: center; justify-content: center;"><div class="book-placeholder-icon" style="transform: scale(0.6);"></div></div>`;
+            ? `<div style="width: 60px; height: 75px; flex-shrink: 0; position: relative;">
+                <img src="${item.cover_img.trim()}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+                <div class="book-placeholder-icon" style="display: none; width: 60px; height: 75px; font-size: 1rem;"><div style="font-size: 0.55rem; color: #fff; font-weight: 700; text-align: center; line-height: 1; padding: 2px; text-transform: uppercase;">${titleAbbr}</div></div>
+               </div>`
+            : `<div style="width: 60px; height: 75px; flex-shrink: 0;">
+                <div class="book-placeholder-icon" style="width: 60px; height: 75px; font-size: 1rem;"><div style="font-size: 0.55rem; color: #fff; font-weight: 700; text-align: center; line-height: 1; padding: 2px; text-transform: uppercase;">${titleAbbr}</div></div>
+               </div>`;
 
           return `
             <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
@@ -954,9 +960,15 @@ class BookstoreApp {
         const items = o.items || [];
         const itemSummaryHtml = items.map(item => {
           const hasCover = item.cover_img && item.cover_img.trim();
+          const titleAbbr = this.escapeHtml((item.title || 'PUC').substring(0, 10));
           const coverHtml = hasCover
-            ? `<img src="${item.cover_img.trim()}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"><div style="display: none; width: 60px; height: 75px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; align-items: center; justify-content: center;"><div class="book-placeholder-icon" style="transform: scale(0.6);"></div></div>`
-            : `<div style="width: 60px; height: 75px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; display: flex; align-items: center; justify-content: center;"><div class="book-placeholder-icon" style="transform: scale(0.6);"></div></div>`;
+            ? `<div style="width: 60px; height: 75px; flex-shrink: 0; position: relative;">
+                <img src="${item.cover_img.trim()}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+                <div class="book-placeholder-icon" style="display: none; width: 60px; height: 75px; font-size: 1rem;"><div style="font-size: 0.55rem; color: #fff; font-weight: 700; text-align: center; line-height: 1; padding: 2px; text-transform: uppercase;">${titleAbbr}</div></div>
+               </div>`
+            : `<div style="width: 60px; height: 75px; flex-shrink: 0;">
+                <div class="book-placeholder-icon" style="width: 60px; height: 75px; font-size: 1rem;"><div style="font-size: 0.55rem; color: #fff; font-weight: 700; text-align: center; line-height: 1; padding: 2px; text-transform: uppercase;">${titleAbbr}</div></div>
+               </div>`;
 
           return `
             <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
