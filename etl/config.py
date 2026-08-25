@@ -7,9 +7,10 @@ DB_USER = os.getenv('DB_USER', 'postgres')
 DB_PASSWORD = os.getenv('DB_PASSWORD', 'pass123')
 DB_NAME = os.getenv('DB_NAME', 'puc_bookstore')
 
-# AWS S3 Configuration
-S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME', 'puc-bookstore-analytics-bucket')
+# Local Storage Configuration
+OUTPUT_DIR = os.getenv('OUTPUT_DIR', os.path.join(os.path.dirname(__file__), 'output'))
 
 # Pipeline Settings
 USE_MOCK = os.getenv('USE_MOCK', 'false').lower() == 'true'
 DEFAULT_EXTRACT_DAYS = 1
+
