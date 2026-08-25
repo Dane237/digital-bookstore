@@ -2,7 +2,7 @@
 
 Official Web Application platform for **Paññāsāstra University of Cambodia (PUC)** digital campus bookstore system.
 
-🌐 **Live Storefront Deployment**: [https://charming-rugelach-827e8e.netlify.app/](https://charming-rugelach-827e8e.netlify.app/)
+🌐 **Live Storefront Deployment**: [https://unrivaled-piroshki-69f896.netlify.app/](https://unrivaled-piroshki-69f896.netlify.app/)
 
 ---
 
@@ -12,7 +12,7 @@ The web application is located in **[`customer/`](./customer)** as a full-stack 
 
 | Directory | Description | Status | Live URL |
 | :--- | :--- | :--- | :--- |
-| **[`customer/`](./customer)** | Unified Web Application containing both the **Student Customer Storefront** and the **Staff Manager Dashboard**. Features course search, cart, checkout (Stripe/ABA/Card), 6-Digit Pickup PIN / QR generation, order tracking, sales analytics, PIN verification, and stock control. | 🚀 Production Ready | [Netlify App](https://charming-rugelach-827e8e.netlify.app/) |
+| **[`customer/`](./customer)** | Unified Web Application containing both the **Student Customer Storefront** and the **Staff Manager Dashboard**. Features course search, cart, checkout (Stripe/ABA/Card), 6-Digit Pickup PIN / QR generation, order tracking, sales analytics, PIN verification, and stock control. | 🚀 Production Ready | [Netlify App](https://unrivaled-piroshki-69f896.netlify.app/) |
 | **[`staff/`](./staff)** | Legacy Standalone Staff directory. | ℹ️ Integrated into `customer/` & `mobile_app/` | N/A |
 
 > [!NOTE]
@@ -36,7 +36,7 @@ Once started, open your browser and navigate to:
 👉 **`http://localhost:8000`**
 
 Or visit the live production app at:  
-👉 **[https://charming-rugelach-827e8e.netlify.app/](https://charming-rugelach-827e8e.netlify.app/)**
+👉 **[https://charming-rugelach-827e8e.netlify.app/](https://unrivaled-piroshki-69f896.netlify.app/)**
 
 ---
 
