@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
 PUC Digital Bookstore - Dedicated Customer Web Application Server
-Flask REST API Backend + SQLite Database + Session Security + Static File Server
+Flask REST API Backend + PostgreSQL Database + Session Security + Static File Server
 Exclusively serves Customer Storefront API endpoints (No Admin/Staff routes).
 """
 
 from flask import Flask, request, jsonify, send_from_directory
-import sqlite3
 import hashlib
 import secrets
 from datetime import datetime, timedelta
@@ -122,13 +121,7 @@ def register_user():
         return jsonify({"status": "error", "detail": "An account with this email already exists"}), 400
 
     employee_id = data.get('employee_id', None)
-
-    if email == 'admin@puc.edu.kh':
-        role = 'Admin'
-    elif employee_id:
-        role = 'Staff'
-    else:
-        role = 'Customer'
+    role = 'Staff' if employee_id else 'Customer'
 
     hashed = hash_password(password)
 
@@ -386,12 +379,9 @@ def seed_database():
     try:
         depts = ['Computer Science & Tech', 'Business & Economics', 'Law & Public Affairs', 'Arts & Humanities', 'Information Technology']
         for dname in depts:
-            cursor.execute("INSERT OR IGNORE INTO departments (name) VALUES (?);", (dname,))
-        
-        hashed = hash_password("password")
-        cursor.execute("INSERT OR IGNORE INTO users (user_id, username, email, password_hash, role, employee_id) VALUES (1, 'PUC Admin', 'admin@puc.edu.kh', ?, 'Admin', 'PUC-ROOT-001');", (hashed,))
+            cursor.execute("INSERT INTO departments (name) VALUES (?) ON CONFLICT DO NOTHING;", (dname,))
         conn.commit()
-        return jsonify({"status": "success", "message": "Database seeded successfully."})
+        return jsonify({"status": "success", "message": "Departments initialized successfully."})
     except Exception as e:
         conn.rollback()
         return jsonify({"status": "error", "detail": str(e)}), 500

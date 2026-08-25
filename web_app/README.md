@@ -51,8 +51,8 @@ Or visit the live production app at:
    - Instant Digital Receipt with unique **6-Digit Pickup PIN** & HTML5 Canvas QR code.
    - Student order tracking (`My Orders`) and store pickup instructions.
 
-2. **Database Compatibility**:
-   - Dual database adapter (`db_adapter.py`) supporting Render Hosted **PostgreSQL** and local **SQLite3**.
+2. **Database Adapter**:
+   - High-performance database adapter (`db_adapter.py`) connected directly to **PostgreSQL**.
 
 ---
 
@@ -60,7 +60,7 @@ Or visit the live production app at:
 
 * **Frontend**: HTML5, Vanilla CSS3 (Custom PUC Design System), Modern JavaScript (ES6 Modules & Dynamic Router), QRious Canvas QR Engine.
 * **Backend Server**: Python REST API (`server.py`) & Database Adapter (`db_adapter.py`).
-* **Database**: PostgreSQL (Render Hosted) / SQLite3 (Local fallback).
+* **Database**: PostgreSQL (Render Hosted / Local Instance).
 * **Security**: PBKDF2 SHA-256 Password Encryption.
 
 ---

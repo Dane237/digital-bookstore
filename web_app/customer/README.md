@@ -23,11 +23,8 @@ The **PUC Digital Bookstore Web Application** is a full-stack e-commerce storefr
 web_app/customer/
 ├── index.html                   # Single Page Application (Student Storefront)
 ├── server.py                    # Python REST API server (Flask/HTTP) with security & PIN generation
-├── db_adapter.py                # Dual PostgreSQL (Render Cloud) & SQLite3 Database Adapter
+├── db_adapter.py                # PostgreSQL Database Adapter
 ├── init_db.py                   # Relational Database Schema Creator
-├── reset_clean_db.py            # Clean Database Reset Utility
-├── migrate_to_postgres.py       # PostgreSQL Cloud Migration Script
-├── puc_bookstore.db             # Local Relational SQLite Database file
 ├── package.json                 # Project npm scripts & metadata
 ├── README.md                    # Detailed Web Application documentation
 │
@@ -98,16 +95,14 @@ The application consists of primary UI screens and interactive modules for stude
 
 ## 🗄️ Database Architecture
 
-The application includes a dual database layer powered by `db_adapter.py`:
+The application connects directly to PostgreSQL via `db_adapter.py`:
 
-* **Cloud PostgreSQL (Production)**:
-  Connects to Render Hosted PostgreSQL (`digital-bookstore-wm64.onrender.com`). Set environment variable:
+* **PostgreSQL Connection**:
+  Connects via `DATABASE_URL` (e.g. Render Hosted PostgreSQL) or individual environment variables (`DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT`).
   ```bash
   $env:DATABASE_URL="postgresql://user:password@render-host.onrender.com/puc_bookstore"
   python server.py 8000
   ```
-* **Local SQLite3 (Offline Fallback)**:
-  Automatically uses `puc_bookstore.db` when offline or when `DATABASE_URL` is omitted.
 
 ---
 
@@ -130,8 +125,8 @@ The application includes a dual database layer powered by `db_adapter.py`:
 ## 🛠️ Technology Stack
 
 * **Frontend**: HTML5, Vanilla CSS3 (Custom PUC Design System), Modern JavaScript (ES6 Modules, Dynamic View Router), QRious (HTML5 Canvas QR Code Engine).
-* **Backend Server**: Python REST API (`server.py`) & Dual Database Adapter (`db_adapter.py`).
-* **Database**: PostgreSQL (Render Cloud) / SQLite3 (`puc_bookstore.db` local).
+* **Backend Server**: Python REST API (`server.py`) & Database Adapter (`db_adapter.py`).
+* **Database**: PostgreSQL (Render Cloud or Local PostgreSQL).
 * **Security**: PBKDF2 SHA-256 Password Encryption (100,000 rounds), Session Token Authentication.
 * **Typography**: Google Fonts (`Inter`, `Outfit`, `JetBrains Mono`).
 * **Icons**: FontAwesome 6.4.0.
