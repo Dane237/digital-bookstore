@@ -96,7 +96,8 @@ def get_books():
             'price': float(r[4]), 'stock_quantity': r[5], 'created_at': str(r[6]),
             'description': r[7], 'cover_img': r[8], 'departments': r[9] or ''
         }
-        item['department'] = item.get('departments', '').split(',')[0] if item.get('departments') else 'General'
+        depts = item.get('departments')
+        item['department'] = depts.split(',')[0].strip() if depts and depts.strip() else 'General'
         books.append(item)
 
     return jsonify(books)
