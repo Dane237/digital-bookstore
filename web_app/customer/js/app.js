@@ -886,16 +886,16 @@ class BookstoreApp {
         const itemSummaryHtml = items.map(item => {
           const hasCover = item.cover_img && item.cover_img.trim();
           const coverHtml = hasCover
-            ? `<img src="${item.cover_img.trim()}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);">`
+            ? `<img src="${item.cover_img.trim()}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"><div style="display: none; width: 60px; height: 75px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; align-items: center; justify-content: center;"><div class="book-placeholder-icon" style="transform: scale(0.6);"></div></div>`
             : `<div style="width: 60px; height: 75px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; display: flex; align-items: center; justify-content: center;"><div class="book-placeholder-icon" style="transform: scale(0.6);"></div></div>`;
 
           return `
             <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
               ${coverHtml}
               <div>
-                <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">${this.escapeHtml(item.title)}</div>
-                <div style="font-size: 0.82rem; color: var(--gray-500);">Qty: ${item.quantity} ${item.author ? `| by ${this.escapeHtml(item.author)}` : ''}</div>
-                <div style="font-weight: 800; font-size: 0.95rem; color: var(--primary-navy); margin-top: 0.2rem;">$${parseFloat(item.price || o.total_amount).toFixed(2)}</div>
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">${this.escapeHtml(item.title || 'Course Textbook')}</div>
+                <div style="font-size: 0.82rem; color: var(--gray-500);">Qty: ${item.quantity || 1} ${item.author ? `| by ${this.escapeHtml(item.author)}` : ''}</div>
+                <div style="font-weight: 800; font-size: 0.95rem; color: var(--primary-navy); margin-top: 0.2rem;">$${parseFloat(item.unit_price || item.price || o.total_amount).toFixed(2)}</div>
               </div>
             </div>
           `;
@@ -914,8 +914,7 @@ class BookstoreApp {
               <div style="display: flex; align-items: center; gap: 1rem;">
                 <div style="width: 60px; height: 75px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; display: flex; align-items: center; justify-content: center;"><div class="book-placeholder-icon" style="transform: scale(0.6);"></div></div>
                 <div>
-                  <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">Software Engineering</div>
-                  <div style="font-size: 0.82rem; color: var(--gray-500);">Qty: 1 | by Ian Sommerville</div>
+                  <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">Order #${displayId}</div>
                   <div style="font-weight: 800; font-size: 0.95rem; color: var(--primary-navy); margin-top: 0.2rem;">$${parseFloat(o.total_amount).toFixed(2)}</div>
                 </div>
               </div>
@@ -940,14 +939,14 @@ class BookstoreApp {
         const itemSummaryHtml = items.map(item => {
           const hasCover = item.cover_img && item.cover_img.trim();
           const coverHtml = hasCover
-            ? `<img src="${item.cover_img.trim()}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);">`
+            ? `<img src="${item.cover_img.trim()}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';"><div style="display: none; width: 60px; height: 75px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; align-items: center; justify-content: center;"><div class="book-placeholder-icon" style="transform: scale(0.6);"></div></div>`
             : `<div style="width: 60px; height: 75px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; display: flex; align-items: center; justify-content: center;"><div class="book-placeholder-icon" style="transform: scale(0.6);"></div></div>`;
 
           return `
             <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
               ${coverHtml}
               <div>
-                <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">${this.escapeHtml(item.title)}</div>
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">${this.escapeHtml(item.title || 'Course Textbook')}</div>
                 <div style="font-size: 0.82rem; color: var(--gray-500);">${item.author ? `by ${this.escapeHtml(item.author)}` : ''}</div>
               </div>
             </div>
@@ -967,8 +966,8 @@ class BookstoreApp {
               <div style="display: flex; align-items: center; gap: 1rem;">
                 <div style="width: 60px; height: 75px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; display: flex; align-items: center; justify-content: center;"><div class="book-placeholder-icon" style="transform: scale(0.6);"></div></div>
                 <div>
-                  <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">Python Programming Basics</div>
-                  <div style="font-size: 0.82rem; color: var(--gray-500);">by John Zelle</div>
+                  <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">Order #${displayId}</div>
+                  <div style="font-weight: 800; font-size: 0.95rem; color: var(--primary-navy); margin-top: 0.2rem;">$${parseFloat(o.total_amount).toFixed(2)}</div>
                 </div>
               </div>
             `}

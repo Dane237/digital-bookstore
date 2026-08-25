@@ -466,28 +466,43 @@ def user_orders(user_id):
     conn = get_db()
     cursor = conn.cursor()
     query = """
-        SELECT o.*, COUNT(oi.order_item_id) as item_count
+        SELECT o.*
         FROM orders o 
-        LEFT JOIN order_items oi ON o.order_id = oi.order_id 
         WHERE o.user_id = ? 
-        GROUP BY o.order_id
         ORDER BY o.order_date DESC;
     """
     cursor.execute(query, (user_id,))
     rows = cursor.fetchall()
-    conn.close()
 
     orders = []
     for r in rows:
         o = dict(r) if hasattr(r, 'keys') or isinstance(r, dict) else {
             'order_id': r[0], 'user_id': r[1], 'order_date': str(r[2]), 'status': r[3],
             'total_amount': float(r[4]), 'payment_method': r[5], 'stripe_payment_id': r[6],
-            'pickup_pin': r[7], 'prepared_location': r[8], 'item_count': r[9]
+            'pickup_pin': r[7], 'prepared_location': r[8]
         }
         o['display_id'] = f"PUC-ORD-{o['order_id'] + 1000}"
         o['created_at'] = str(o.get('order_date', ''))[:16]
+
+        # Fetch items for each order
+        cursor.execute("""
+            SELECT oi.quantity, oi.unit_price, b.title, b.author, b.cover_img
+            FROM order_items oi
+            LEFT JOIN books b ON oi.book_id = b.book_id
+            WHERE oi.order_id = ?;
+        """, (o['order_id'],))
+        item_rows = cursor.fetchall()
+        o['items'] = [
+            dict(ir) if hasattr(ir, 'keys') or isinstance(ir, dict) else {
+                'quantity': ir[0], 'unit_price': float(ir[1]),
+                'title': ir[2] or 'Book', 'author': ir[3] or '', 'cover_img': ir[4] or ''
+            }
+            for ir in item_rows
+        ]
+        o['item_count'] = len(o['items'])
         orders.append(o)
 
+    conn.close()
     return jsonify(orders)
 
 @app.route('/api/orders/detail/<int:order_id>', methods=['GET'])
@@ -495,9 +510,9 @@ def order_details(order_id):
     conn = get_db()
     cursor = conn.cursor()
     query = """
-        SELECT oi.*, b.title, b.cover_img 
+        SELECT oi.*, b.title, b.author, b.cover_img 
         FROM order_items oi 
-        JOIN books b ON oi.book_id = b.book_id 
+        LEFT JOIN books b ON oi.book_id = b.book_id 
         WHERE oi.order_id = ?;
     """
     cursor.execute(query, (order_id,))
@@ -506,7 +521,7 @@ def order_details(order_id):
 
     items = [dict(r) if hasattr(r, 'keys') or isinstance(r, dict) else {
         'order_item_id': r[0], 'order_id': r[1], 'book_id': r[2], 'quantity': r[3],
-        'unit_price': float(r[4]), 'title': r[5], 'cover_img': r[6]
+        'unit_price': float(r[4]), 'title': r[5] or 'Book', 'author': r[6] or '', 'cover_img': r[7] or ''
     } for r in rows]
 
     return jsonify(items)
