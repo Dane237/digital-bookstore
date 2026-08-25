@@ -2,7 +2,7 @@
 
 This repository contains the complete ecosystem for the **Paññāsāstra University of Cambodia (PUC)** Bookstore system. All applications (Mobile App and Web Application) share the same **PostgreSQL** database via central API services.
 
-🌐 **Live Web Customer Storefront**: [https://unrivaled-piroshki-69f896.netlify.app/](https://unrivaled-piroshki-69f896.netlify.app/)
+🌐 **Live Web Customer Storefront**: [https://remarkable-hamster-4e03ad.netlify.app/](https://remarkable-hamster-4e03ad.netlify.app/)
 
 ---
 
@@ -28,7 +28,7 @@ Deploy the `backend/` FastAPI folder to Render, or launch the Python REST API se
 
 ### 3. Applications
 - **Mobile (Flutter)**: See **[mobile_app/README.md](./mobile_app/README.md)** (Customer, Staff & Admin features).
-- **Web Application**: Live on **[Netlify](https://unrivaled-piroshki-69f896.netlify.app/)**. See **[web_app/README.md](./web_app/README.md)** and **[web_app/customer/README.md](./web_app/customer/README.md)** (Dedicated Student Customer Storefront).
+- **Web Application**: Live on **[Netlify](https://remarkable-hamster-4e03ad.netlify.app/)**. See **[web_app/README.md](./web_app/README.md)** and **[web_app/customer/README.md](./web_app/customer/README.md)** (Dedicated Student Customer Storefront).
 
 
 ---
