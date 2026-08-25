@@ -900,11 +900,16 @@ class BookstoreApp {
         const displayId = o.display_id || `PUC-ORD-${o.order_id + 1000}`;
         const items = o.items || [];
         const itemSummaryHtml = items.map(item => {
-          const hasCover = item.cover_img && item.cover_img.trim();
+          const catalogMatch = (this.books || []).find(b =>
+            (b.book_id && item.book_id && b.book_id == item.book_id) ||
+            (b.title && item.title && b.title.toLowerCase().trim() === item.title.toLowerCase().trim())
+          );
+          const rawCover = (item.cover_img && item.cover_img.trim()) || (catalogMatch && catalogMatch.cover_img ? catalogMatch.cover_img.trim() : '');
+          const hasCover = Boolean(rawCover);
           const titleAbbr = this.escapeHtml((item.title || 'PUC').substring(0, 10));
           const coverHtml = hasCover
             ? `<div style="width: 60px; height: 75px; flex-shrink: 0; position: relative;">
-                <img src="${item.cover_img.trim()}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+                <img src="${rawCover}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
                 <div class="book-placeholder-icon" style="display: none; width: 60px; height: 75px; font-size: 1rem;"><div style="font-size: 0.55rem; color: #fff; font-weight: 700; text-align: center; line-height: 1; padding: 2px; text-transform: uppercase;">${titleAbbr}</div></div>
                </div>`
             : `<div style="width: 60px; height: 75px; flex-shrink: 0;">
@@ -915,8 +920,8 @@ class BookstoreApp {
             <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
               ${coverHtml}
               <div>
-                <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">${this.escapeHtml(item.title || 'Course Textbook')}</div>
-                <div style="font-size: 0.82rem; color: var(--gray-500);">Qty: ${item.quantity || 1} ${item.author ? `| by ${this.escapeHtml(item.author)}` : ''}</div>
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">${this.escapeHtml(item.title || (catalogMatch ? catalogMatch.title : 'Course Textbook'))}</div>
+                <div style="font-size: 0.82rem; color: var(--gray-500);">Qty: ${item.quantity || 1} ${item.author || (catalogMatch ? catalogMatch.author : '') ? `| by ${this.escapeHtml(item.author || catalogMatch.author)}` : ''}</div>
                 <div style="font-weight: 800; font-size: 0.95rem; color: var(--primary-navy); margin-top: 0.2rem;">$${parseFloat(item.unit_price || item.price || o.total_amount).toFixed(2)}</div>
               </div>
             </div>
@@ -959,23 +964,31 @@ class BookstoreApp {
         const displayId = o.display_id || `PUC-ORD-${o.order_id + 1000}`;
         const items = o.items || [];
         const itemSummaryHtml = items.map(item => {
-          const hasCover = item.cover_img && item.cover_img.trim();
-          const titleAbbr = this.escapeHtml((item.title || 'PUC').substring(0, 10));
+          const catalogMatch = (this.books || []).find(b =>
+            (b.book_id && item.book_id && b.book_id == item.book_id) ||
+            (b.title && item.title && b.title.toLowerCase().trim() === item.title.toLowerCase().trim())
+          );
+          const rawCover = (item.cover_img && item.cover_img.trim()) || (catalogMatch && catalogMatch.cover_img ? catalogMatch.cover_img.trim() : '');
+          const hasCover = Boolean(rawCover);
+          const titleAbbr = this.escapeHtml((item.title || (catalogMatch ? catalogMatch.title : 'PUC')).substring(0, 10));
           const coverHtml = hasCover
             ? `<div style="width: 60px; height: 75px; flex-shrink: 0; position: relative;">
-                <img src="${item.cover_img.trim()}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+                <img src="${rawCover}" style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gray-200);" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
                 <div class="book-placeholder-icon" style="display: none; width: 60px; height: 75px; font-size: 1rem;"><div style="font-size: 0.55rem; color: #fff; font-weight: 700; text-align: center; line-height: 1; padding: 2px; text-transform: uppercase;">${titleAbbr}</div></div>
                </div>`
             : `<div style="width: 60px; height: 75px; flex-shrink: 0;">
                 <div class="book-placeholder-icon" style="width: 60px; height: 75px; font-size: 1rem;"><div style="font-size: 0.55rem; color: #fff; font-weight: 700; text-align: center; line-height: 1; padding: 2px; text-transform: uppercase;">${titleAbbr}</div></div>
                </div>`;
 
+          const itemTitle = item.title || (catalogMatch ? catalogMatch.title : 'Course Textbook');
+          const itemAuthor = item.author || (catalogMatch ? catalogMatch.author : '');
+
           return `
             <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.75rem;">
               ${coverHtml}
               <div>
-                <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">${this.escapeHtml(item.title || 'Course Textbook')}</div>
-                <div style="font-size: 0.82rem; color: var(--gray-500);">${item.author ? `by ${this.escapeHtml(item.author)}` : ''}</div>
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--gray-900);">${this.escapeHtml(itemTitle)}</div>
+                <div style="font-size: 0.82rem; color: var(--gray-500);">${itemAuthor ? `by ${this.escapeHtml(itemAuthor)}` : ''}</div>
               </div>
             </div>
           `;
