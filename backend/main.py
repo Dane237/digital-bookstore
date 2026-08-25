@@ -168,7 +168,7 @@ def get_db_connection():
     )
 
 @app.get("/api/health/")
-async def health_check():
+def health_check():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -207,7 +207,7 @@ async def startup_event():
 # — ENDPOINTS —
 
 @app.get("/api/departments/")
-async def get_departments():
+def get_departments():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM departments ORDER BY name ASC")
@@ -218,7 +218,7 @@ async def get_departments():
     return depts_list
 
 @app.get("/api/books/")
-async def get_books(department: str = "all", q: str = ""):
+def get_books(department: str = "all", q: str = ""):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     query = """
@@ -422,7 +422,7 @@ def admin_reset_password(req: AdminPasswordReset):
         conn.close()
 
 @app.post("/api/admin/books/add/")
-async def admin_add_book(data: ManualBookAddRequest):
+def admin_add_book(data: ManualBookAddRequest):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -449,7 +449,7 @@ async def admin_add_book(data: ManualBookAddRequest):
         conn.close()
 
 @app.delete("/api/admin/books/{book_id}/")
-async def delete_book(book_id: int):
+def delete_book(book_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -465,7 +465,7 @@ async def delete_book(book_id: int):
         conn.close()
 
 @app.post("/api/orders/")
-async def create_order(order: OrderCreate):
+def create_order(order: OrderCreate):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
@@ -491,7 +491,7 @@ async def create_order(order: OrderCreate):
         conn.close()
 
 @app.get("/api/orders/{user_id}")
-async def user_orders(user_id: int):
+def user_orders(user_id: int):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     query = """
@@ -515,7 +515,7 @@ async def user_orders(user_id: int):
     return orders
 
 @app.patch("/api/orders/{order_id}/cancel/")
-async def cancel_order(order_id: int):
+def cancel_order(order_id: int):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
@@ -542,7 +542,7 @@ async def cancel_order(order_id: int):
         conn.close()
 
 @app.get("/api/admin/orders/")
-async def get_admin_orders(status: str):
+def get_admin_orders(status: str):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     query = """
@@ -566,7 +566,7 @@ async def get_admin_orders(status: str):
     return orders
 
 @app.patch("/api/admin/orders/{order_id}/prepare/")
-async def admin_prepare(order_id: int, location: str, staff_id: int):
+def admin_prepare(order_id: int, location: str, staff_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
@@ -579,7 +579,7 @@ async def admin_prepare(order_id: int, location: str, staff_id: int):
     return {"status": "success"}
 
 @app.get("/api/admin/orders/lookup/{pin}")
-async def lookup_pin(pin: str):
+def lookup_pin(pin: str):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     query = """
@@ -602,7 +602,7 @@ async def lookup_pin(pin: str):
     return order
 
 @app.patch("/api/admin/orders/{order_id}/pickup/")
-async def fulfill_pickup(order_id: int, staff_id: int):
+def fulfill_pickup(order_id: int, staff_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
@@ -615,7 +615,7 @@ async def fulfill_pickup(order_id: int, staff_id: int):
     return {"status": "success"}
 
 @app.get("/api/admin/isbn-lookup/{isbn}")
-async def isbn_lookup(isbn: str):
+def isbn_lookup(isbn: str):
     try:
         url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
         with urllib.request.urlopen(url) as response:
@@ -633,7 +633,7 @@ async def isbn_lookup(isbn: str):
         return {"error": str(e)}
 
 @app.get("/api/orders/detail/{order_id}")
-async def order_details(order_id: int):
+def order_details(order_id: int):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     query = """
@@ -649,7 +649,7 @@ async def order_details(order_id: int):
     return items
 
 @app.get("/api/staff/analytics/")
-async def get_analytics():
+def get_analytics():
     conn = None
     try:
         conn = get_db_connection()
@@ -720,7 +720,7 @@ async def get_analytics():
 
 # — PROJECT RESET & SETUP SEEDER —
 @app.post("/api/admin/seed/")
-async def seed_data():
+def seed_data():
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -754,7 +754,7 @@ async def seed_data():
         conn.close()
 
 @app.post("/api/admin/wipe-inventory/")
-async def wipe_inventory():
+def wipe_inventory():
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
