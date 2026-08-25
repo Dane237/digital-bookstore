@@ -82,7 +82,23 @@ class BookstoreApp {
     try {
       const res = await fetch(`${this.apiBaseUrl}/orders/${this.user.user_id}`);
       if (res.ok) {
-        this.orders = await res.json();
+        const rawOrders = await res.json();
+        this.orders = await Promise.all(rawOrders.map(async (o) => {
+          if (!o.items || o.items.length === 0) {
+            try {
+              const dRes = await fetch(`${this.apiBaseUrl}/orders/detail/${o.order_id}`);
+              if (dRes.ok) {
+                const detailItems = await dRes.json();
+                if (Array.isArray(detailItems) && detailItems.length > 0) {
+                  o.items = detailItems;
+                }
+              }
+            } catch (e) {
+              console.warn(`Error fetching items for order ${o.order_id}:`, e);
+            }
+          }
+          return o;
+        }));
         localStorage.setItem('puc_customer_orders', JSON.stringify(this.orders));
         if (this.currentView === 'my-orders') {
           this.renderOrdersView();
