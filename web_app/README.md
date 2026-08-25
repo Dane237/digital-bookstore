@@ -36,7 +36,7 @@ Once started, open your browser and navigate to:
 👉 **`http://localhost:8000`**
 
 Or visit the live production app at:  
-👉 **[https://charming-rugelach-827e8e.netlify.app/](https://unrivaled-piroshki-69f896.netlify.app/)**
+👉 **[https://unrivaled-piroshki-69f896.netlify.app/](https://unrivaled-piroshki-69f896.netlify.app/)**
 
 ---
 
