@@ -2,6 +2,8 @@ import requests
 from django.shortcuts import render, redirect
 from .models import Book, Department
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+
 
 def inventory_dashboard_view(request):
     """
@@ -467,6 +469,7 @@ from django.db.models import Sum
 from django.utils import timezone
 from .models import Order, Book
 
+@login_required
 def dashboard_index_view(request):
     """
      MAIN ANALYTICS CONTROLLER: Computes real-time aggregates straight out of
