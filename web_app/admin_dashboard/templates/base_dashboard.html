@@ -50,15 +50,16 @@
           <!-- 1. Dashboard / Main Link -->
           <a
             href="{% url 'dashboard_home' %}"
-            class="flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-150 {% if request.path == '/dashboard/' %}text-white font-bold{% else %}text-slate-400 hover:text-white{% endif %} no-underline"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-150 no-underline {% if request.path == '/' %}active text-white font-bold{% else %}text-slate-400 hover:text-white{% endif %}"
             onmouseover="
-              this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
+              if (window.location.pathname !== '/')
+                this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
             "
             onmouseout="
-              if (window.location.pathname !== '/dashboard/')
+              if (window.location.pathname !== '/')
                 this.style.backgroundColor = 'transparent';
             "
-            style="{% if request.path == '/dashboard/' %}background-color: rgba(255, 255, 255, 0.08);{% else %}background-color: transparent;{% endif %}"
+            style="{% if request.path == '/' %}background-color: rgba(255, 255, 255, 0.08);{% else %}background-color: transparent;{% endif %}"
           >
             <svg
               class="flex-shrink-0"
@@ -78,15 +79,16 @@
           <!-- 2. Catalog View Link -->
           <a
             href="{% url 'catalog_view' %}"
-            class="flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-150 {% if request.path == '/dashboard/catalog/' %}text-white font-bold{% else %}text-slate-400 hover:text-white{% endif %} no-underline"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-150 no-underline {% if 'catalog' in request.path %}active text-white font-bold{% else %}text-slate-400 hover:text-white{% endif %}"
             onmouseover="
-              this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
+              if (!window.location.pathname.includes('catalog'))
+                this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
             "
             onmouseout="
-              if (window.location.pathname !== '/dashboard/catalog/')
+              if (!window.location.pathname.includes('catalog'))
                 this.style.backgroundColor = 'transparent';
             "
-            style="{% if request.path == '/dashboard/catalog/' %}background-color: rgba(255, 255, 255, 0.08);{% else %}background-color: transparent;{% endif %}"
+            style="{% if 'catalog' in request.path %}background-color: rgba(255, 255, 255, 0.08);{% else %}background-color: transparent;{% endif %}"
           >
             <svg
               class="flex-shrink-0"
@@ -108,15 +110,16 @@
           <!-- 3. Inventory Link -->
           <a
             href="{% url 'inventory_dashboard' %}"
-            class="flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-150 {% if request.path == '/dashboard/inventory/' %}text-white font-bold{% else %}text-slate-400 hover:text-white{% endif %} no-underline"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-150 no-underline {% if 'inventory' in request.path %}active text-white font-bold{% else %}text-slate-400 hover:text-white{% endif %}"
             onmouseover="
-              this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
+              if (!window.location.pathname.includes('inventory'))
+                this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
             "
             onmouseout="
-              if (window.location.pathname !== '/dashboard/inventory/')
+              if (!window.location.pathname.includes('inventory'))
                 this.style.backgroundColor = 'transparent';
             "
-            style="{% if request.path == '/dashboard/inventory/' %}background-color: rgba(255, 255, 255, 0.08);{% else %}background-color: transparent;{% endif %}"
+            style="{% if 'inventory' in request.path %}background-color: rgba(255, 255, 255, 0.08);{% else %}background-color: transparent;{% endif %}"
           >
             <svg
               class="flex-shrink-0"
@@ -138,15 +141,16 @@
           <!-- 4. Orders Link -->
           <a
             href="{% url 'orders' %}"
-            class="flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-150 {% if request.path == '/dashboard/orders/' %}text-white font-bold{% else %}text-slate-400 hover:text-white{% endif %} no-underline"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-150 no-underline {% if 'orders' in request.path %}active text-white font-bold{% else %}text-slate-400 hover:text-white{% endif %}"
             onmouseover="
-              this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
+              if (!window.location.pathname.includes('orders'))
+                this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
             "
             onmouseout="
-              if (window.location.pathname !== '/dashboard/orders/')
+              if (!window.location.pathname.includes('orders'))
                 this.style.backgroundColor = 'transparent';
             "
-            style="{% if request.path == '/dashboard/orders/' %}background-color: rgba(255, 255, 255, 0.08);{% else %}background-color: transparent;{% endif %}"
+            style="{% if 'orders' in request.path %}background-color: rgba(255, 255, 255, 0.08);{% else %}background-color: transparent;{% endif %}"
           >
             <svg
               class="flex-shrink-0"
@@ -168,15 +172,16 @@
           <!-- 5. Account Settings Link -->
           <a
             href="{% url 'admin_settings' %}"
-            class="flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-150 {% if request.path == '/dashboard/settings/' %}text-white font-bold{% else %}text-slate-400 hover:text-white{% endif %} no-underline"
+            class="flex items-center space-x-3 px-4 py-3 rounded-lg transition duration-150 no-underline {% if 'settings' in request.path %}active text-white font-bold{% else %}text-slate-400 hover:text-white{% endif %}"
             onmouseover="
-              this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'
+              if (!window.location.pathname.includes('settings'))
+                this.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
             "
             onmouseout="
-              if (window.location.pathname !== '/dashboard/settings/')
+              if (!window.location.pathname.includes('settings'))
                 this.style.backgroundColor = 'transparent';
             "
-            style="{% if request.path == '/dashboard/settings/' %}background-color: rgba(255, 255, 255, 0.08);{% else %}background-color: transparent;{% endif %}"
+            style="{% if 'settings' in request.path %}background-color: rgba(255, 255, 255, 0.08);{% else %}background-color: transparent;{% endif %}"
           >
             <!-- settings Icon -->
             <svg
