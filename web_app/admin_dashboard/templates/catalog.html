@@ -1,0 +1,239 @@
+{% extends 'base_dashboard.html' %} {% block content %}
+<!-- free of layout shifts -->
+<style>
+  .admin-catalog-canvas .catalog-toolbar-flex {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 2rem !important;
+  }
+
+  /* E-COMMERCE CARD GRID SYSTEM */
+  .admin-catalog-canvas .catalog-product-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: 24px !important;
+    width: 100% !important;
+  }
+
+  /* Book Cover Card Frame */
+  .admin-catalog-canvas .book-cover-frame {
+    aspect-ratio: 3 / 4 !important;
+    background-color: #f8fafc !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease !important;
+  }
+  .admin-catalog-canvas .book-card-node:hover .book-cover-frame {
+    transform: translateY(-4px) !important;
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  }
+</style>
+
+<div
+  class="admin-catalog-canvas block w-full"
+  style="margin-top: -12px !important; box-sizing: border-box !important"
+>
+  <!-- 1. ACTION AND CONTROL TOOLBAR -->
+  <div
+    style="
+      display: block !important;
+      width: 100% !important;
+      padding-bottom: 1rem !important;
+    "
+  >
+    <!-- Left Side-->
+    <div style="margin-bottom: 1rem !important">
+      <h1
+        class="text-slate-800 tracking-tight"
+        style="
+          font-size: 22px !important;
+          font-weight: 900 !important;
+          margin: 0 0 6px 0 !important;
+          display: block !important;
+        "
+      >
+        Catalog View
+      </h1>
+
+      <p class="text-sm text-slate-500 mt-1">
+        Browse and audit active university textbook listings currently published
+        on the public student storefront platform.
+      </p>
+    </div>
+
+    <!-- Right Side Input Group-->
+    <div
+      style="
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 12px !important;
+        justify-content: flex-start !important;
+        width: 100% !important;
+      "
+    >
+      <!--THE LONG SEARCH FIELD-->
+      <form
+        method="GET"
+        action="{% url 'catalog_view' %}"
+        style="
+          position: relative !important;
+          width: 400px !important;
+          flex-shrink: 0 !important;
+          margin: 0;
+          padding: 0;
+        "
+      >
+        <input
+          type="text"
+          name="search_catalog"
+          value="{{ search_query|default:'' }}"
+          placeholder="Search book by title, author, department or ISBN..."
+          class="w-full bg-white border border-slate-300 rounded-lg pl-10 pr-10 py-2 text-sm text-slate-700 focus:outline-none focus:border-slate-400 shadow-sm"
+          style="
+            height: 40px !important;
+            padding: 0 14px !important;
+            width: 100% !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            font-size: 14px !important;
+            outline: none !important;
+            box-shadow: none !important;
+            transition: all 0.15s ease-in-out !important;
+          "
+          onfocus="
+            this.style.borderColor = '#ff9800';
+            this.style.boxShadow = '0 0 0 3px rgba(255, 152, 0, 0.15)';
+          "
+          onblur="
+            this.style.borderColor = '#cbd5e1';
+            this.style.boxShadow = 'none';
+          "
+        />
+        <!-- ✕ Clear button toggle -->
+        {% if search_query %}
+        <a
+          href="{% url 'catalog_view' %}"
+          class="absolute text-slate-400 hover:text-slate-600 text-sm font-bold focus:outline-none transition select-none"
+          style="
+            position: absolute !important;
+            right: 12px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            text-decoration: none !important;
+            line-height: 1 !important;
+            z-index: 10 !important;
+          "
+          >✕</a
+        >
+        {% endif %}
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. PRODUCT CARD-->
+  <div class="px-2 pb-12 w-full">
+    <div class="catalog-product-grid">
+      <!-- DATABASE LOOP-->
+      {% for book in books %}
+      <div
+        class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between book-card-node transition"
+      >
+        <!-- Book Container -->
+        <div>
+          <!-- Frame Cover Container -->
+          <div
+            class="book-cover-frame relative border border-slate-100 mb-3 shadow-inner"
+          >
+            <!-- FIXED cover_image -->
+            {% if book.cover_img %}
+            <img
+              src="{{book.cover_img}}"
+              alt="{{book.title}}"
+              class="w-full h-full object-cover select-none pointer-events-none"
+            />
+            {% else %}
+            <!-- Fallback SVG Book Cover -->
+            <div
+              class="flex flex-col items-center justify-center text-slate-300"
+            >
+              <span style="font-size: 2rem">📖</span>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Title Data String -->
+          <h3
+            class="text-sm font-bold text-slate-800 line-clamp-2 tracking-tight"
+            title="{{ book.title }}"
+          >
+            {{ book.title }}
+          </h3>
+
+          <!-- Author Data String -->
+          <p class="text-xs font-semibold text-slate-400 mt-0.5 truncate">
+            by {{ book.author|default:"Unknown Author" }}
+          </p>
+        </div>
+
+        <!-- Price Display & Stock Counters -->
+        <div
+          class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between"
+        >
+          <!-- Price Field -->
+          <span class="text-sm font-black text-slate-900"
+            >${{ book.price }}</span
+          >
+
+          <!-- INVENTORY QUANTITY EVALUATION -->
+          {% if book.stock_quantity > 0 %}
+          <span
+            class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full"
+          >
+            {{ book.stock_quantity }} available
+          </span>
+          {% else %}
+          <span
+            class="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full"
+          >
+            Out of stock
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      {% empty %}
+      <!-- fallback notice layout-->
+      <div
+        style="grid-column: 1 / -1 !important"
+        class="bg-white rounded-xl border border-slate-200 border-dashed p-12 text-center"
+      >
+        <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem"
+          >🔎</span
+        >
+        <h4 class="text-sm font-bold text-slate-700">
+          No books found in catalog
+        </h4>
+        <p class="text-xs text-slate-400 mt-1">
+          Try modifying your search criteria or publishing new inventory
+          records.
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

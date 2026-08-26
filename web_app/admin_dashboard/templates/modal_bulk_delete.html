@@ -1,0 +1,141 @@
+<!-- AUTOMATED WRAPPER ENGINE MATRIX: Full viewport overlay centered with warning indicators -->
+<div
+  id="bulk-delete-modal"
+  class="fixed inset-0 w-full h-full bg-slate-900/40 backdrop-blur-sm p-4"
+  style="
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 99999 !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+  "
+>
+  <!-- Floating Modal Card Frame Layout Container -->
+  <div
+    class="bg-white rounded-xl shadow-lg border border-slate-300 w-full max-w-md overflow-hidden flex flex-col mx-auto my-auto animate-pop"
+  >
+    <!-- 1. Crimson Warning Header Title Bar Section -->
+    <div
+      class="bg-[#be123c] text-white p-4 px-6 flex justify-between items-center flex-shrink-0"
+    >
+      <div class="flex items-center space-x-2">
+        <span>⚠️</span>
+        <h3 class="font-bold text-sm tracking-wide">
+          Confirm Bulk Delete Operation
+        </h3>
+      </div>
+      <!-- to avoid auto-formatter bugs -->
+      <button
+        type="button"
+        onclick="
+          document
+            .getElementById('bulk-delete-modal')
+            .style.setProperty('display', 'none', 'important')
+        "
+        class="hover:opacity-75 text-lg font-bold transition focus:outline-none"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- 2. WARNING MESSAGE MESSAGE MODULE FORM -->
+
+    <form
+      action="{% url 'bulk_update_books_backend' %}"
+      method="POST"
+      class="bg-white flex flex-col m-0"
+      onclick="event.stopPropagation()"
+    >
+      {% csrf_token %}
+
+      <!-- HOOKED INTERLINK SELECTION DATA TRACKERS -->
+      <input
+        type="hidden"
+        id="bulk-ids-delete-tracker"
+        name="selected_book_ids_string"
+        value=""
+      />
+      <input type="hidden" name="bulk_action_type_flag" value="bulk_delete" />
+
+      <!-- Warning Description Content Area Section -->
+      <div class="p-6 bg-white space-y-3">
+        <h4 class="text-sm font-black text-slate-800 tracking-tight">
+          Permanently delete selected items?
+        </h4>
+        <p class="text-xs text-slate-500 leading-relaxed">
+          You are about to remove these textbook records completely from the
+          university database catalog stream.
+          <span class="font-bold text-rose-600"
+            >This bulk action is irreversible.</span
+          >
+        </p>
+
+        <!-- Dynamic selection indicator tracking banner box container -->
+        <div
+          class="bg-rose-50 border border-rose-100 rounded-lg p-2.5 px-4 text-center mt-2"
+        >
+          <span
+            class="text-xs font-black text-rose-700 uppercase tracking-wider"
+            >Action applies to selected books</span
+          >
+        </div>
+      </div>
+
+      <!-- 3. FOOTER ACTIONS ACTIONS BAR -->
+      <div
+        class="flex items-center justify-end space-x-3 p-4 px-6 border-t border-slate-200 bg-slate-50 flex-shrink-0"
+      >
+        <!-- CANCEL BUTTON -->
+        <button
+          type="button"
+          onclick="
+            document
+              .getElementById('bulk-delete-modal')
+              .style.setProperty('display', 'none', 'important')
+          "
+          class="px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+          style="
+            background-color: #f1f5f9 !important;
+            color: #334155 !important;
+            border: 1px solid #cbd5e1 !important;
+            display: inline-block !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease-in-out !important;
+          "
+          onmouseover="
+            this.style.backgroundColor = '#e2e8f0';
+            this.style.borderColor = '#94a3b8';
+          "
+          onmouseout="
+            this.style.backgroundColor = '#f1f5f9';
+            this.style.borderColor = '#cbd5e1';
+          "
+        >
+          Cancel
+        </button>
+
+        <!--DELETE BUTTON-->
+        <button
+          type="submit"
+          class="px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+          style="
+            background-color: #dc2626 !important;
+            color: #ffffff !important;
+            border: none !important;
+            display: inline-block !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease-in-out !important;
+          "
+          onmouseover="this.style.backgroundColor = '#b91c1c'"
+          onmouseout="this.style.backgroundColor = '#dc2626'"
+        >
+          Delete
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,1191 @@
+{% extends 'base_dashboard.html' %}
+<!--prettier ignore-->
+{% block content %}
+<!-- MAIN OVERVIEW LAYOUT VIEWPORT CONTAINER-->
+
+<div
+  class="flex-1 overflow-y-auto bg-slate-50/50 min-h-screen pb-12 w-full"
+  style="
+    font-family: system-ui, sans-serif !important;
+    padding: 0px 0px 24px 0px !important;
+    margin-top: -12px !important;
+    box-sizing: border-box !important;
+  "
+>
+  <!-- STREAMLINED UPPER HEADER  -->
+  <div
+    style="
+      text-align: left !important;
+      margin-bottom: 20px !important;
+      padding-top: 12px !important;
+    "
+  >
+    <h1
+      style="
+        margin: 0 !important;
+        font-size: 22px !important;
+        font-weight: 900 !important;
+        color: #1e293b !important;
+        tracking: -0.02em !important;
+      "
+    >
+      Operational Dashboard Overview
+    </h1>
+    <p
+      style="
+        margin: 4px 0 0 0 !important;
+        font-size: 10px !important;
+        color: #94a3b8 !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+      "
+    >
+      Real-Time Business Performance Analytics Matrix Hub.
+    </p>
+  </div>
+
+  <!-- 1. HORIZONTAL GRID METRIC ROW -->
+  <div
+    style="
+      display: grid !important;
+      grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+      gap: 12px !important;
+      margin-bottom: 20px !important;
+      width: 100% !important;
+    "
+  >
+    <!-- Card 1: Today's Books Sold -->
+    <div
+      style="
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        padding: 16px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        text-align: left !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        box-sizing: border-box !important;
+      "
+    >
+      <div>
+        <span
+          style="
+            display: block !important;
+            font-size: 24px !important;
+            font-weight: 900 !important;
+            color: #4f46e5 !important;
+            line-height: 1.1 !important;
+          "
+          >{{ books_sold_today|default:"0" }}</span
+        >
+        <span
+          style="
+            display: block !important;
+            font-size: 10px !important;
+            color: #94a3b8 !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            margin-top: 6px !important;
+            letter-spacing: 0.02em !important;
+          "
+          >Books Sold Today</span
+        >
+      </div>
+      <!-- Gradient Ring Background Circle Wrapper -->
+      <div
+        style="
+          width: 40px !important;
+          height: 40px !important;
+          background: linear-gradient(
+            135deg,
+            #e0e7ff 0%,
+            #e0f2fe 100%
+          ) !important;
+          border-radius: 50% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+        "
+      >
+        <svg
+          style="
+            width: 18px !important;
+            height: 18px !important;
+            fill: #4f46e5 !important;
+          "
+          viewBox="0 0 24 24"
+          xmlns="http://w3.org"
+        >
+          <path
+            d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Card 2: Total Stock Counter -->
+    <div
+      style="
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        padding: 16px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        text-align: left !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        box-sizing: border-box !important;
+      "
+    >
+      <div>
+        <span
+          style="
+            display: block !important;
+            font-size: 24px !important;
+            font-weight: 900 !important;
+            color: #1e293b !important;
+            line-height: 1.1 !important;
+          "
+          >{{ total_stock|default:"0" }}</span
+        >
+        <span
+          style="
+            display: block !important;
+            font-size: 10px !important;
+            color: #94a3b8 !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            margin-top: 6px !important;
+            letter-spacing: 0.02em !important;
+          "
+          >Total Stock</span
+        >
+      </div>
+      <!-- Gradient Background Circle Wrapper -->
+      <div
+        style="
+          width: 40px !important;
+          height: 40px !important;
+          background: linear-gradient(
+            135deg,
+            #f1f5f9 0%,
+            #e2e8f0 100%
+          ) !important;
+          border-radius: 50% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+        "
+      >
+        <svg
+          style="
+            width: 18px !important;
+            height: 18px !important;
+            fill: #334155 !important;
+          "
+          viewBox="0 0 24 24"
+          xmlns="http://w3.org"
+        >
+          <path
+            d="M22 6.5l-10-5.5-10 5.5v11l10 5.5 10-5.5v-11zm-10-3.32l7.86 4.32-2.86 1.57-7.86-4.32 2.86-1.57zM4.14 7.7l7.86 4.32v8.66l-7.86-4.32V7.7zm9.86 12.98v-8.66l7.86-4.32v8.66l-7.86 4.32z"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Card 3: Today's Earnings -->
+    <div
+      style="
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        padding: 16px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        text-align: left !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        box-sizing: border-box !important;
+      "
+    >
+      <div>
+        <span
+          style="
+            display: block !important;
+            font-size: 24px !important;
+            font-weight: 900 !important;
+            color: #e11d48 !important;
+            line-height: 1.1 !important;
+          "
+          >${{ todays_earnings|floatformat:2|default:"0.00" }}</span
+        >
+        <span
+          style="
+            display: block !important;
+            font-size: 10px !important;
+            color: #94a3b8 !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            margin-top: 6px !important;
+            letter-spacing: 0.02em !important;
+          "
+          >Today's Earnings</span
+        >
+      </div>
+      <!--  Gradient Background Circle Wrapper -->
+      <div
+        style="
+          width: 40px !important;
+          height: 40px !important;
+          background: linear-gradient(
+            135deg,
+            #ffe4e6 0%,
+            #fecdd3 100%
+          ) !important;
+          border-radius: 50% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+        "
+      >
+        <svg
+          style="
+            width: 18px !important;
+            height: 18px !important;
+            fill: #e11d48 !important;
+          "
+          viewBox="0 0 24 24"
+          xmlns="http://w3.org"
+        >
+          <path
+            d="M21 18H3V6h18v12zm-9-7c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm7-3h-2v2h2V8zM5 8h2v2H5V8zm0 6h2v2H5v-2zm14 2h-2v-2h2v2z"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Card 4: Interactive Pending Prep Block Link -->
+
+    <a
+      href="{% url 'orders' %}?status=Pending"
+      style="
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        text-decoration: none !important;
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        padding: 16px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        transition: all 0.15s !important;
+        text-align: left !important;
+        box-sizing: border-box !important;
+      "
+      onmouseover="
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)';
+      "
+      onmouseout="
+        this.style.transform = 'none';
+        this.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.02)';
+      "
+    >
+      <!-- Left Statistics Content -->
+      <div>
+        <span
+          style="
+            display: block !important;
+            font-size: 24px !important;
+            font-weight: 900 !important;
+            color: #0284c7 !important;
+            line-height: 1.1 !important;
+          "
+          >{{ pending_count|default:"0" }}</span
+        >
+        <span
+          style="
+            display: block !important;
+            font-size: 10px !important;
+            color: #94a3b8 !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            margin-top: 6px !important;
+            letter-spacing: 0.02em !important;
+          "
+          >Pending Prep &rarr;</span
+        >
+      </div>
+
+      <!-- RIGHT SIDE-->
+      <div
+        style="
+          width: 40px !important;
+          height: 40px !important;
+          background: linear-gradient(
+            135deg,
+            #e0f2fe 0%,
+            #bae6fd 100%
+          ) !important;
+          border-radius: 50% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+        "
+      >
+        <svg
+          style="
+            width: 18px !important;
+            height: 18px !important;
+            fill: #0284c7 !important;
+          "
+          viewBox="0 0 24 24"
+          xmlns="http://w3.org"
+        >
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+          />
+        </svg>
+      </div>
+    </a>
+
+    <!-- Card 5: Interactive Ready for Pickup Block Link -->
+
+    <a
+      href="{% url 'orders' %}?status=Ready for Pickup"
+      style="
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        text-decoration: none !important;
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        padding: 16px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        transition: all 0.15s !important;
+        text-align: left !important;
+        box-sizing: border-box !important;
+      "
+      onmouseover="
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)';
+      "
+      onmouseout="
+        this.style.transform = 'none';
+        this.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.02)';
+      "
+    >
+      <!-- Left Statistics Content  -->
+      <div>
+        <span
+          style="
+            display: block !important;
+            font-size: 24px !important;
+            font-weight: 900 !important;
+            color: #16a34a !important;
+            line-height: 1.1 !important;
+          "
+          >{{ ready_count|default:"0" }}</span
+        >
+        <span
+          style="
+            display: block !important;
+            font-size: 10px !important;
+            color: #94a3b8 !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            margin-top: 6px !important;
+            letter-spacing: 0.02em !important;
+          "
+          >Ready for Pickup &rarr;</span
+        >
+      </div>
+
+      <!-- RIGHT SIDE-->
+      <div
+        style="
+          width: 40px !important;
+          height: 40px !important;
+          background: linear-gradient(
+            135deg,
+            #dcfce7 0%,
+            #bbf7d0 100%
+          ) !important;
+          border-radius: 50% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+        "
+      >
+        <svg
+          style="
+            width: 18px !important;
+            height: 18px !important;
+            fill: #16a34a !important;
+          "
+          viewBox="0 0 24 24"
+          xmlns="http://w3.org"
+        >
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+          />
+        </svg>
+      </div>
+    </a>
+
+    <!-- Card 6: Interactive Today's Pickups Block Link -->
+
+    <div
+      style="
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        padding: 16px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        transition: all 0.15s !important;
+        text-align: left !important;
+        box-sizing: border-box !important;
+      "
+      onmouseover="
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)';
+      "
+      onmouseout="
+        this.style.transform = 'none';
+        this.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.02)';
+      "
+    >
+      <!-- Left Statistics Content-->
+      <div>
+        <span
+          style="
+            display: block !important;
+            font-size: 24px !important;
+            font-weight: 900 !important;
+            color: #334155 !important;
+            line-height: 1.1 !important;
+          "
+          >{{ completed_count|default:"0" }}</span
+        >
+        <span
+          style="
+            display: block !important;
+            font-size: 10px !important;
+            color: #94a3b8 !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            margin-top: 6px !important;
+            letter-spacing: 0.02em !important;
+          "
+          >Today's Pickups &rarr;</span
+        >
+      </div>
+
+      <!--  RIGHT SIDE-->
+      <div
+        style="
+          width: 40px !important;
+          height: 40px !important;
+          background: linear-gradient(
+            135deg,
+            #f1f5f9 0%,
+            #e2e8f0 100%
+          ) !important;
+          border-radius: 50% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+        "
+      >
+        <svg
+          style="
+            width: 18px !important;
+            height: 18px !important;
+            fill: #475569 !important;
+          "
+          viewBox="0 0 24 24"
+          xmlns="http://w3.org"
+        >
+          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. INLINE CHARTS ROW SPLIT -->
+  <div
+    style="
+      display: flex !important;
+      flex-direction: row !important;
+      gap: 16px !important;
+      margin-bottom: 20px !important;
+      width: 100% !important;
+    "
+  >
+    <!-- WEEKLY REVENUE TREND LINE-->
+    <div
+      style="
+        flex: 7 !important;
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        padding: 16px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+        min-height: 320px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+      "
+    >
+      <!--LIVE REVENUE HEADER WITH FILTER -->
+      <div
+        class="flex items-center justify-between mb-4"
+        style="box-sizing: border-box"
+      >
+        <div class="flex items-center space-x-2">
+          <span class="text-slate-400">📊</span>
+          <h3
+            class="text-sm font-bold text-slate-800 tracking-wide uppercase"
+            style="margin: 0"
+          >
+            Revenue: Week of {{ monday_date|date:"F d, Y" }}
+          </h3>
+        </div>
+
+        <!--Navigation Filters -->
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-sizing: border-box;
+          "
+        >
+          <!-- Last Week Navigation Link -->
+          <a
+            href="?week={{ week_offset|add:-1 }}"
+            style="
+              padding: 5px 12px !important;
+              font-size: 11px !important;
+              font-weight: 700 !important;
+              border: 1px solid #cbd5e1 !important;
+              background-color: #ffffff !important;
+              color: #334155 !important;
+              border-radius: 6px !important;
+              text-decoration: none !important;
+              transition: all 0.15s ease-in-out !important;
+              display: inline-block !important;
+            "
+            onmouseover="
+              this.style.backgroundColor = '#f8fafc';
+              this.style.borderColor = '#94a3b8';
+            "
+            onmouseout="
+              this.style.backgroundColor = '#ffffff';
+              this.style.borderColor = '#cbd5e1';
+            "
+          >
+            ◀ Last Week
+          </a>
+
+          <!-- Current Week Home Link  -->
+          {% if week_offset != 0 %}
+          <a
+            href="?week=0"
+            style="
+              padding: 5px 12px !important;
+              font-size: 11px !important;
+              font-weight: 700 !important;
+              background-color: #f1f5f9 !important;
+              color: #475569 !important;
+              border-radius: 6px !important;
+              text-decoration: none !important;
+              display: inline-block !important;
+            "
+            onmouseover="this.style.backgroundColor = '#e2e8f0'"
+            onmouseout="this.style.backgroundColor = '#f1f5f9'"
+          >
+            Current Week
+          </a>
+          {% endif %}
+
+          <!-- Next Week Navigation Link -->
+          <a
+            href="?week={{ week_offset|add:1 }}"
+            style="
+              padding: 5px 12px !important;
+              font-size: 11px !important;
+              font-weight: 700 !important;
+              border: 1px solid #cbd5e1 !important;
+              background-color: #ffffff !important;
+              color: #334155 !important;
+              border-radius: 6px !important;
+              text-decoration: none !important;
+              transition: all 0.15s ease-in-out !important;
+              display: inline-block !important;
+            "
+            onmouseover="
+              this.style.backgroundColor = '#f8fafc';
+              this.style.borderColor = '#94a3b8';
+            "
+            onmouseout="
+              this.style.backgroundColor = '#ffffff';
+              this.style.borderColor = '#cbd5e1';
+            "
+          >
+            Next Week ▶
+          </a>
+
+          <!-- Live Sync badge  -->
+          <span
+            class="px-2.5 py-1 text-xs font-bold bg-emerald-100 text-emerald-700 rounded-full animate-pulse"
+            style="display: inline-block; box-sizing: border-box"
+            >Live Sync</span
+          >
+        </div>
+      </div>
+
+      <div
+        style="
+          flex: 1 !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: flex-end !important;
+          padding-top: 12px !important;
+        "
+      >
+        <div
+          style="
+            display: flex !important;
+            align-items: flex-end !important;
+            justify-content: space-between !important;
+            height: 160px !important;
+            padding: 0 16px !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            position: relative !important;
+          "
+        >
+          <div
+            style="width: 16px; background-color: #ecf163; border-top-left-radius: 4px; border-top-right-radius: 4px; transition: height 0.5s; height: {{ mon_pct }}%;"
+            title="Monday Sales: ${{ rev_mon }}"
+          ></div>
+          <div
+            style="width: 16px; background-color: #ecf163; border-top-left-radius: 4px; border-top-right-radius: 4px; transition: height 0.5s; height: {{ tue_pct }}%;"
+            title="Tuesday Sales: ${{ rev_tue }}"
+          ></div>
+          <div
+            style="width: 16px; background-color: #ecf163; border-top-left-radius: 4px; border-top-right-radius: 4px; transition: height 0.5s; height: {{ wed_pct }}%;"
+            title="Wednesday Sales: ${{ rev_wed }}"
+          ></div>
+          <div
+            style="width: 16px; background-color: #ecf163; border-top-left-radius: 4px; border-top-right-radius: 4px; transition: height 0.5s; height: {{ thu_pct }}%;"
+            title="Thursday Sales: ${{ rev_thu }}"
+          ></div>
+          <div
+            style="width: 16px; background-color: #ecf163; border-top-left-radius: 4px; border-top-right-radius: 4px; transition: height 0.5s; height: {{ fri_pct }}%;"
+            title="Friday Sales: ${{ rev_fri }}"
+          ></div>
+          <div
+            style="width: 16px; background-color: #ecf163; border-top-left-radius: 4px; border-top-right-radius: 4px; transition: height 0.5s; height: {{ sat_pct }}%;"
+            title="Saturday Sales: ${{ rev_sat }}"
+          ></div>
+          <div
+            style="width: 16px; background-color: #ecf163; border-top-left-radius: 4px; border-top-right-radius: 4px; transition: height 0.5s; height: {{ sun_pct }}%;"
+            title="Sunday Sales: ${{ rev_sun }}"
+          ></div>
+        </div>
+        <div
+          style="
+            display: flex !important;
+            justify-content: space-between !important;
+            font-size: 9px !important;
+            font-weight: 900 !important;
+            color: #94a3b8 !important;
+            text-transform: uppercase !important;
+            padding-top: 8px !important;
+            letter-spacing: 0.05em !important;
+          "
+        >
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span
+          ><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULFILLMENT QUEUE RATIOS BAR PANEL  -->
+  </div>
+
+  <!-- 2. INLINE CHARTS & ALERTS ROW SPLIT -->
+
+  <div
+    style="
+      display: flex !important;
+      gap: 24px !important;
+      width: 100% !important;
+      align-items: stretch !important;
+      box-sizing: border-box !important;
+    "
+  >
+    <!-- LEFT COLUMN-->
+    <div
+      style="
+        flex: 6 !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+      "
+    >
+      <div
+        style="
+          background-color: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          padding: 24px !important;
+          border-radius: 16px !important;
+          box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.05),
+            0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+          height: 100% !important;
+        "
+      >
+        <!-- Card Title Bar Row -->
+        <div
+          style="
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            margin-bottom: 20px !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            padding-bottom: 12px !important;
+          "
+        >
+          <div
+            style="
+              display: flex !important;
+              align-items: center !important;
+              gap: 8px !important;
+            "
+          >
+            <span style="font-size: 16px !important">📦</span>
+            <h3
+              style="
+                font-size: 13px !important;
+                font-weight: 800 !important;
+                text-transform: uppercase !important;
+                color: #1e293b !important;
+                letter-spacing: 0.05em !important;
+                margin: 0 !important;
+              "
+            >
+              Fulfillment Pipeline
+            </h3>
+          </div>
+          <span
+            style="
+              font-size: 11px !important;
+              font-weight: 700 !important;
+              color: #64748b !important;
+              background-color: #f1f5f9 !important;
+              padding: 4px 8px !important;
+              border-radius: 6px !important;
+            "
+            >Real-Time</span
+          >
+        </div>
+
+        <!-- Main Tracking Stack Container -->
+        <div
+          style="
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 18px !important;
+          "
+        >
+          <!-- STATE 1: PENDING PREPARATION -->
+          <div>
+            <div
+              style="
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                margin-bottom: 6px !important;
+                font-size: 12px !important;
+                font-weight: 700 !important;
+              "
+            >
+              <span style="color: #475569 !important">Pending Preparation</span>
+              <span
+                style="
+                  color: #0284c7 !important;
+                  background-color: #e0f2fe !important;
+                  padding: 2px 6px !important;
+                  border-radius: 4px !important;
+                "
+                >{{ pending_count|default:"0" }} units</span
+              >
+            </div>
+            <div
+              style="
+                width: 100% !important;
+                height: 10px !important;
+                background-color: #f1f5f9 !important;
+                border-radius: 999px !important;
+                overflow: hidden !important;
+              "
+            >
+              <div
+                style="width: {{ pending_pct|default:'0' }}% !important; height: 100% !important; background-color: #0ea5e9 !important; border-radius: 999px !important; transition: width 0.6s ease-in-out !important;"
+              ></div>
+            </div>
+          </div>
+
+          <!-- STATE 2: READY FOR PICKUP -->
+          <div>
+            <div
+              style="
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                margin-bottom: 6px !important;
+                font-size: 12px !important;
+                font-weight: 700 !important;
+              "
+            >
+              <span style="color: #475569 !important">Ready For Pickup</span>
+              <!-- 🟢 UPDATED: Pure Emerald Green typography with a crisp, low-contrast green background highlight -->
+              <span
+                style="
+                  color: #16a34a !important;
+                  background-color: #dcfce7 !important;
+                  padding: 2px 6px !important;
+                  border-radius: 4px !important;
+                "
+                >{{ ready_count|default:"0" }} units</span
+              >
+            </div>
+            <div
+              style="
+                width: 100% !important;
+                height: 10px !important;
+                background-color: #f1f5f9 !important;
+                border-radius: 999px !important;
+                overflow: hidden !important;
+              "
+            >
+              <!-- 🟢 UPDATED: Solid Emerald Green progress bar filling anchor matching enterprise standards -->
+              <div
+                style="width: {{ ready_pct|default:'0' }}% !important; height: 100% !important; background-color: #22c55e !important; border-radius: 999px !important; transition: width 0.6s ease-in-out !important;"
+              ></div>
+            </div>
+          </div>
+
+          <!-- STATE 3: COMPLETED -->
+          <div>
+            <div
+              style="
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                margin-bottom: 6px !important;
+                font-size: 12px !important;
+                font-weight: 700 !important;
+              "
+            >
+              <span style="color: #475569 !important">Completed Dispatch</span>
+              <!-- 🔘 UPDATED: Neutral dark slate typography with a low-contrast gray background highlight -->
+              <span
+                style="
+                  color: #475569 !important;
+                  background-color: #f1f5f9 !important;
+                  padding: 2px 6px !important;
+                  border-radius: 4px !important;
+                "
+                >{{ completed_count|default:"0" }} units</span
+              >
+            </div>
+            <div
+              style="
+                width: 100% !important;
+                height: 10px !important;
+                background-color: #f1f5f9 !important;
+                border-radius: 999px !important;
+                overflow: hidden !important;
+              "
+            >
+              <!-- progress bar -->
+              <div
+                style="width: {{ completed_pct|default:'0' }}% !important; height: 100% !important; background-color: #94a3b8 !important; border-radius: 999px !important; transition: width 0.6s ease-in-out !important;"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+
+    <div
+      style="
+        flex: 4 !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+      "
+    >
+      <div
+        style="
+          background-color: #ffffff !important;
+          border: 1px solid #e2e8f0 !important;
+          padding: 24px !important;
+          border-radius: 16px !important;
+          box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.05),
+            0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+          height: 100% !important;
+          display: flex !important;
+          flex-direction: column !important;
+        "
+      >
+        <!-- Card Title Bar Row -->
+        <div
+          style="
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            margin-bottom: 16px !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            padding-bottom: 12px !important;
+            flex-shrink: 0 !important;
+          "
+        >
+          <div
+            style="
+              display: flex !important;
+              align-items: center !important;
+              gap: 8px !important;
+            "
+          >
+            <span style="font-size: 16px !important">⚠️</span>
+            <h3
+              style="
+                font-size: 13px !important;
+                font-weight: 800 !important;
+                text-transform: uppercase !important;
+                color: #1e293b !important;
+                letter-spacing: 0.05em !important;
+                margin: 0 !important;
+              "
+            >
+              Critical Stock Alerts
+            </h3>
+          </div>
+          <span
+            style="
+              font-size: 10px !important;
+              font-weight: 700 !important;
+              color: #b91c1c !important;
+              background-color: #fef2f2 !important;
+              border: 1px solid #fee2e2 !important;
+              padding: 4px 8px !important;
+              border-radius: 6px !important;
+              text-transform: uppercase !important;
+              letter-spacing: 0.03em !important;
+            "
+            >Action Required</span
+          >
+        </div>
+
+        <!-- THE TABLE ENGINE SCROLL WRAPPER-->
+        <div
+          style="flex-1 !important; max-height: 220px !important; overflow-y: auto !important; padding-right: 4px !important;"
+        >
+          <table
+            style="
+              width: 100% !important;
+              border-collapse: collapse !important;
+              text-align: left !important;
+            "
+          >
+            <!-- Fixed Table Column Header Line -->
+            <thead
+              style="
+                position: sticky !important;
+                top: 0 !important;
+                background-color: #f8fafc !important;
+                z-index: 10 !important;
+              "
+            >
+              <tr>
+                <th
+                  style="
+                    font-size: 11px !important;
+                    font-weight: 800 !important;
+                    text-transform: uppercase !important;
+                    color: #64748b !important;
+                    letter-spacing: 0.02em !important;
+                    padding: 8px 12px !important;
+                    border-radius: 6px 0 0 6px !important;
+                  "
+                >
+                  Textbook Title Catalog
+                </th>
+                <th
+                  style="
+                    font-size: 11px !important;
+                    font-weight: 800 !important;
+                    text-transform: uppercase !important;
+                    color: #64748b !important;
+                    letter-spacing: 0.02em !important;
+                    padding: 8px 12px !important;
+                    text-align: right !important;
+                    border-radius: 0 6px 6px 0 !important;
+                  "
+                >
+                  Current Stock
+                </th>
+              </tr>
+            </thead>
+
+            <!-- Dynamic Data Row Loop Body Stack -->
+            <tbody>
+              {% for book in low_stock_alerts %}
+              <tr
+                style="
+                  border-bottom: 1px solid #f1f5f9 !important;
+                  transition: background-color 0.15s ease-in-out !important;
+                "
+                onmouseover="this.style.backgroundColor = '#f8fafc'"
+                onmouseout="this.style.backgroundColor = 'transparent'"
+              >
+                <!-- Left Side Column Cell-->
+                <td
+                  style="
+                    padding: 12px !important;
+                    font-size: 13px !important;
+                    font-weight: 600 !important;
+                    color: #334155 !important;
+                  "
+                >
+                  <div
+                    style="
+                      white-space: nowrap !important;
+                      overflow: hidden !important;
+                      text-overflow: ellipsis !important;
+                      max-width: 220px !important;
+                    "
+                    title="{{ book.title }}"
+                  >
+                    {{ book.title }}
+                  </div>
+                </td>
+
+                <!-- Right Side Column Cell-->
+                <td
+                  style="
+                    padding: 12px !important;
+                    text-align: right !important;
+                    vertical-align: middle !important;
+                  "
+                >
+                  {% if book.stock_quantity == 0 %}
+                  <span
+                    style="
+                      font-size: 11px !important;
+                      font-weight: 800 !important;
+                      color: #ffffff !important;
+                      background-color: #ef4444 !important;
+                      padding: 4px 10px !important;
+                      border-radius: 999px !important;
+                      display: inline-block !important;
+                      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2) !important;
+                    "
+                  >
+                    Out of Stock
+                  </span>
+                  {% elif book.stock_quantity == 1 %}
+                  <span
+                    style="
+                      font-size: 11px !important;
+                      font-weight: 700 !important;
+                      color: #b45309 !important;
+                      background-color: #fef3c7 !important;
+                      border: 1px solid #fde68a !important;
+                      padding: 4px 10px !important;
+                      border-radius: 999px !important;
+                      display: inline-block !important;
+                    "
+                  >
+                    1 unit left
+                  </span>
+                  {% else %}
+                  <span
+                    style="
+                      font-size: 11px !important;
+                      font-weight: 700 !important;
+                      color: #b45309 !important;
+                      background-color: #fef3c7 !important;
+                      border: 1px solid #fde68a !important;
+                      padding: 4px 10px !important;
+                      border-radius: 999px !important;
+                      display: inline-block !important;
+                    "
+                  >
+                    {{ book.stock_quantity }} units left
+                  </span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <!-- Fallback Empty State-->
+              <tr>
+                <td
+                  colspan="2"
+                  style="
+                    padding: 40px 0 !important;
+                    text-align: center !important;
+                  "
+                >
+                  <span
+                    style="
+                      font-size: 24px !important;
+                      display: block !important;
+                      margin-bottom: 8px !important;
+                    "
+                    >🎉</span
+                  >
+                  <span
+                    style="
+                      font-size: 13px !important;
+                      font-weight: 600 !important;
+                      color: #64748b !important;
+                    "
+                    >All inventory volumes are fully stocked!</span
+                  >
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

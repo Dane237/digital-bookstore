@@ -1,0 +1,214 @@
+<!-- THE BULK PRICE OVERRIDE MODAL OVERLAY -->
+
+<div
+  id="bulk-price-modal"
+  class="fixed inset-0 w-full h-full bg-slate-900/40 backdrop-blur-sm p-4"
+  style="
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 99999 !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+  "
+>
+  <!-- Floating Modal Card Frame -->
+  <div
+    class="bg-white rounded-xl shadow-lg border border-slate-300 w-full max-w-md overflow-hidden flex flex-col mx-auto my-auto animate-pop"
+  >
+    <!-- Brand Navy Blue Header Title Bar Section -->
+    <div
+      class="bg-[#16163f] text-white p-4 px-6 flex justify-between items-center flex-shrink-0"
+    >
+      <h3 class="font-bold text-sm tracking-wide">
+        Batch Price Override Matrix
+      </h3>
+      <!-- Clean, single-line form closer button avoids auto-formatter bugs -->
+      <button
+        type="button"
+        onclick="
+          document
+            .getElementById('bulk-price-modal')
+            .style.setProperty('display', 'none', 'important')
+        "
+        class="hover:opacity-75 text-lg font-bold transition focus:outline-none"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- 2. OVERRIDE VALUE SELECTION FIELD CONFIGURATION FORM -->
+
+    <form
+      action="{% url 'bulk_update_books_backend' %}"
+      method="POST"
+      class="bg-white flex flex-col m-0"
+      onclick="event.stopPropagation()"
+    >
+      {% csrf_token %}
+
+      <!-- HOOKED INTERLINK SELECTION DATA TRACKERS -->
+      <input
+        type="hidden"
+        id="bulk-ids-price-tracker"
+        name="selected_book_ids_string"
+        value=""
+      />
+      <input type="hidden" name="bulk_action_type_flag" value="bulk_price" />
+
+      <!-- Contextual Selection Alert Banner -->
+      <div
+        class="bg-slate-50 border-b border-slate-100 p-4 px-6 flex flex-col gap-1 flex-shrink-0"
+      >
+        <p class="text-xs font-semibold text-slate-500">
+          Applying to selected books.
+        </p>
+        <h4 class="text-sm font-black text-slate-800 tracking-tight mt-0.5">
+          How would you like adjust the price?
+        </h4>
+      </div>
+
+      <!-- Override Adjustment Mechanics Entry Fields -->
+      <div class="p-6 space-y-5 bg-white">
+        <!-- Strategy Row A: Percentage Markdown Configurations -->
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="block text-[11px] font-black text-slate-500 uppercase tracking-wider pl-1"
+            >Percentage adjustment</label
+          >
+          <!-- 📐 Add a clean 10px gap between the select box and the number field -->
+          <div
+            style="
+              display: flex !important;
+              gap: 10px !important;
+              width: 100% !important;
+              margin-bottom: 16px !important;
+            "
+          >
+            <!-- FIXED DIRECTION KEY-->
+            <select
+              name="bulk_percentage_type"
+              class="w-full h-10 bg-white border-2 border-slate-400 rounded-lg px-3 text-sm font-medium text-slate-800 text-center font-bold focus:outline-none focus:border-indigo-600 transition"
+              style="
+                border: 2px solid #94a3b8 !important;
+                outline: none !important;
+              "
+            >
+              <option value="markdown">Percentage markdown (-)</option>
+              <option value="markup">Percentage markup (+)</option>
+            </select>
+            <div class="relative flex-1">
+              <!-- FIXED VALUE KEY-->
+              <input
+                type="number"
+                name="bulk_percentage_value"
+                min="1"
+                max="100"
+                placeholder="10"
+                class="w-full h-10 bg-white border-2 border-slate-400 rounded-lg px-3 text-sm font-medium text-slate-800 text-center font-bold focus:outline-none focus:border-indigo-600 transition"
+                style="
+                  border: 2px solid #94a3b8 !important;
+                  outline: none !important;
+                "
+              />
+              <span
+                class="absolute right-3 top-2.5 text-slate-400 text-sm font-bold select-none"
+                >%</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Divider Text Anchor Label Segment -->
+        <div class="flex items-center my-2 select-none">
+          <div class="flex-1 border-t border-slate-200"></div>
+          <span
+            class="px-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider"
+            >Or choose fixed amount</span
+          >
+          <div class="flex-1 border-t border-slate-200"></div>
+        </div>
+
+        <!-- Strategy Row B: Fixed Amount Price Target -->
+        <div class="flex flex-col gap-1.5">
+          <label
+            class="block text-[11px] font-black text-slate-500 uppercase tracking-wider pl-1"
+            >Fixed amount</label
+          >
+          <div class="relative w-full">
+            <span
+              class="absolute left-3 top-2.5 text-slate-400 text-sm font-bold select-none"
+              >$</span
+            >
+            <!-- FIXED AMOUNT KEY-->
+            <input
+              type="text"
+              name="bulk_price_value"
+              placeholder="5.00"
+              class="w-full h-10 bg-white border-2 border-slate-400 rounded-lg px-3 text-sm font-medium text-slate-800 text-center font-bold focus:outline-none focus:border-indigo-600 transition"
+              style="
+                border: 2px solid #94a3b8 !important;
+                outline: none !important;
+              "
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. FOOTER ACTIONS PANEL BAR -->
+      <div
+        class="flex items-center justify-end space-x-3 p-4 px-6 border-t border-slate-200 bg-slate-50 flex-shrink-0"
+      >
+        <!-- 🎯 CANCEL BUTTON: Styled as a soft slate capsule with premium hover highlights -->
+        <button
+          type="button"
+          onclick="
+            document
+              .getElementById('price-override-modal')
+              .style.setProperty('display', 'none', 'important')
+          "
+          class="px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+          style="
+            background-color: #f1f5f9 !important;
+            color: #334155 !important;
+            border: 1px solid #cbd5e1 !important;
+            display: inline-block !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease-in-out !important;
+          "
+          onmouseover="
+            this.style.backgroundColor = '#e2e8f0';
+            this.style.borderColor = '#94a3b8';
+          "
+          onmouseout="
+            this.style.backgroundColor = '#f1f5f9';
+            this.style.borderColor = '#cbd5e1';
+          "
+        >
+          Cancel
+        </button>
+
+        <!-- 💛 APPLY BUTTON: High-contrast corporate yellow block with a deeper gold hover shift -->
+        <button
+          type="submit"
+          class="px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+          style="
+            background-color: #eab308 !important; /* 💛 Professional warm amber/yellow fill */
+            color: #0f172a !important; /* 💛 Ultra-dark slate text for perfect contrast readability */
+            border: none !important;
+            display: inline-block !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease-in-out !important;
+          "
+          onmouseover="this.style.backgroundColor = '#ca8a04'"
+          onmouseout="this.style.backgroundColor = '#eab308'"
+        >
+          Apply
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

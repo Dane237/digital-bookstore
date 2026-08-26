@@ -1,0 +1,381 @@
+{% extends 'base_dashboard.html' %} {% block content %}
+<!-- makes absolute grid guidelines across the entire file -->
+<style>
+  .admin-workspace-canvas .orders-toolbar-flex {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .admin-workspace-canvas .orders-search-box {
+    position: relative;
+    width: 320px;
+    flex-shrink: 0;
+  }
+
+  /* Rotates arrow indicator automatically when open class is applied */
+  .admin-workspace-canvas .arrow-indicator {
+    transition: transform 0.15s ease;
+    display: inline-block;
+  }
+  .admin-workspace-canvas .open-row .arrow-indicator {
+    transform: rotate(90deg);
+  }
+
+  /* left alignments */
+  .admin-workspace-canvas table thead th,
+  .admin-workspace-canvas table tbody td {
+    text-align: left !important;
+    vertical-align: middle !important;
+    padding: 1rem !important;
+  }
+
+  /* Clears top border line inside open drawer seamlessly */
+  .admin-workspace-canvas .detail-drawer-row td {
+    border-top: none !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+</style>
+
+<!-- 1. ACTION AND CONTROL TOOLBAR -->
+<div
+  style="
+    display: block !important;
+    width: 100% !important;
+    padding-bottom: 1rem !important;
+    margin-top: -12px !important; 
+    box-sizing: border-box !important;
+  "
+>
+  <!-- Left Side-->
+  <div style="margin-bottom: 1rem !important">
+    <h1
+        class="text-slate-800 tracking-tight"
+        style="
+          font-size: 22px !important;
+          font-weight: 900 !important;
+          margin: 0 0 6px 0 !important;
+          display: block !important;
+        "
+      >
+        Order Management
+    </h1>
+    <p class="text-sm text-slate-500 mt-1">
+      Monitor student textbook orders, process storage slot assignments, and verify pick up status.
+    </p>
+  </div>
+
+  <!-- Row Layout for Search and Filter Groups -->
+  <div
+    style="
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: flex-end !important;
+      gap: 24px !important;
+      justify-content: space-between !important;
+      width: 100% !important;
+    "
+  >
+      <!-- THE LONG SEARCH FIELD-->
+    <div style="position: relative !important; width: 400px !important; flex-shrink: 0 !important;">
+      <!-- FIXED SEARCH FORM MATRIX-->
+      <form
+        method="GET"
+        action="{% url 'orders' %}"
+        class="inline-block m-0 p-0"
+        style="position: relative !important; width: 400px !important; flex-shrink: 0 !important; display: inline-block !important;"
+      >
+        <!-- Ensure any currently active status filter tab stays locked while searching -->
+        {% if current_filter %}
+          <input type="hidden" name="status" value="{{ current_filter }}">
+        {% endif %}
+
+        <input
+          type="text"
+          name="search_q"
+          value="{{ search_query|default:'' }}"
+          placeholder="Search order by PIN..."
+          class="w-full bg-white border border-slate-300 rounded-lg pl-10 pr-10 py-2 text-sm text-slate-700 focus:outline-none focus:border-slate-400 shadow-sm"
+          style="
+            height: 40px !important;
+            padding: 0 14px !important;
+            width: 100% !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            font-size: 14px !important;
+            outline: none !important;
+            box-shadow: none !important;
+            transition: all 0.15s ease-in-out !important;
+          "
+          onfocus="
+            this.style.borderColor = '#ff9800';
+            this.style.boxShadow = '0 0 0 3px rgba(255, 152, 0, 0.15)';
+          "
+          onblur="
+            this.style.borderColor = '#cbd5e1';
+            this.style.boxShadow = 'none';
+          "
+        />
+        
+        <!-- DYNAMIC CLEAR LINK ANCHOR: Displays the '✕' icon to drop query parameters  -->
+        {% if search_query %}
+        <a
+          href="{% url 'orders' %}{% if current_filter %}?status={{ current_filter }}{% endif %}"
+          class="absolute text-slate-400 hover:text-slate-600 text-sm font-bold focus:outline-none transition select-none"
+          style="position: absolute !important; right: 12px !important; top: 50% !important; transform: translateY(-50%) !important; text-decoration: none !important; line-height: 1 !important; z-index: 10 !important;"
+          title="Clear search filter metrics"
+        >
+          ✕
+        </a>
+        {% endif %}
+      </form>
+    </div>
+
+
+
+    <!-- Right Side-->
+    <div style="display: flex !important; flex-direction: column !important; gap: 6px !important; align-items: flex-start !important;">
+      
+            <!-- COMPACT VERTICAL-STACK FILTER NAVIGATION BAR-->
+      <div class="flex items-center space-x-4 text-[11px] font-bold uppercase tracking-wider text-slate-400 select-none">
+        <span class="mr-1 select-none text-slate-400">Quick Filters:</span>
+        
+        <!-- Tab 1: All Orders -->
+        <a href="?status=All{% if search_query %}&search_q={{ search_query }}{% endif %}" 
+           class="px-4 py-2 rounded-xl border transition duration-150 flex flex-col items-center justify-center min-w-[95px] text-center {% if current_filter == 'All' or not current_filter %}bg-slate-900 border-slate-900 text-white shadow-sm{% else %}bg-white border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 shadow-sm{% endif %}">
+          <span class="font-bold tracking-tight">All Orders</span>
+          <span class="text-[11px] font-black mt-1 {% if current_filter == 'All' or not current_filter %}text-white/60{% else %}text-slate-400{% endif %}">&mdash;</span>
+        </a>
+
+        <!-- Tab 2: Pending Prep Orders -->
+        <a href="?status=Pending{% if search_query %}&search_q={{ search_query }}{% endif %}" 
+           class="px-4 py-2 rounded-xl border transition duration-150 flex flex-col items-center justify-center min-w-[95px] text-center {% if current_filter == 'Pending' %}bg-amber-500 border-amber-500 text-white shadow-sm{% else %}bg-white border-slate-200 text-slate-500 hover:text-amber-600 hover:bg-amber-50/30 shadow-sm{% endif %}">
+          <span class="font-bold tracking-tight">Pending</span>
+          <span class="text-[11px] font-black mt-1 px-2 py-0.5 rounded {% if current_filter == 'Pending' %}bg-white/20 text-white{% else %}bg-amber-50 text-amber-600 border border-amber-100{% endif %}">
+            {{ pending_count }}
+          </span>
+        </a>
+
+        <!-- Tab 3: Ready for Pickup Orders -->
+        <a href="?status=Ready for Pickup{% if search_query %}&search_q={{ search_query }}{% endif %}" 
+           class="px-4 py-2 rounded-xl border transition duration-150 flex flex-col items-center justify-center min-w-[95px] text-center {% if current_filter == 'Ready for Pickup' %}bg-blue-600 border-blue-600 text-white shadow-sm{% else %}bg-white border-slate-200 text-slate-500 hover:text-blue-600 hover:bg-blue-50/30 shadow-sm{% endif %}">
+          <span class="font-bold tracking-tight">Ready</span>
+          <span class="text-[11px] font-black mt-1 px-2 py-0.5 rounded {% if current_filter == 'Ready for Pickup' %}bg-white/20 text-white{% else %}bg-blue-50 text-blue-600 border border-blue-100{% endif %}">
+            {{ ready_count }}
+          </span>
+        </a>
+
+        <!-- Tab 4: Completed Orders -->
+        <a href="?status=Picked Up{% if search_query %}&search_q={{ search_query }}{% endif %}" 
+           class="px-4 py-2 rounded-xl border transition duration-150 flex flex-col items-center justify-center min-w-[95px] text-center {% if current_filter == 'Picked Up' %}bg-emerald-600 border-emerald-600 text-white shadow-sm{% else %}bg-white border-slate-200 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50/30 shadow-sm{% endif %}">
+          <span class="font-bold tracking-tight">Completed</span>
+          <span class="text-[11px] font-black mt-1 px-2 py-0.5 rounded {% if current_filter == 'Picked Up' %}bg-white/20 text-white{% else %}bg-emerald-50 text-emerald-600 border border-emerald-100{% endif %}">
+            {{ completed_count }}
+          </span>
+        </a>
+      </div>
+
+
+
+
+    </div>
+  </div>
+</div>
+
+
+
+  <!-- 2. THE GEOMETRIC ORDERS DATATABLE SHEET -->
+<div class="mx-8 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+  <table class="w-full text-left border-collapse" style="width: 100% !important; table-layout: fixed !important">
+    
+        <!-- COLGROUP BLUEPRINT-->
+    <colgroup>
+      <col style="width: 50px;" />     
+      <col style="width: 10%;" />     
+      <col style="width: 23%;" />    
+      <col style="width: 15%;" />     
+      <col style="width: 10%;" />     
+      <col style="width: 13%;" />     
+      <col style="width: 16%;" />     
+      <col style="width: 13%;" />     
+    </colgroup>
+
+
+    <!-- White Header Matrix -->
+  
+    <thead>
+      <tr class="bg-white border-b border-slate-200 text-slate-400 text-xs font-bold uppercase tracking-wider">
+        <th class="p-4 text-left w-[48px]"></th>
+        <th class="p-4 text-left">OrderID</th>
+        <th class="p-4 text-left">Customer</th>
+        <th class="p-4 text-left">Stored Location</th>
+        <th class="p-4 text-left">Total</th>
+        <th class="p-4 text-left">Date Placed</th>
+        <th class="p-4 text-left">Status</th>
+        <th class="p-4 text-center pr-6">Action</th>
+      </tr>
+    </thead>
+
+
+        <!-- HARD REAL-TIME DATABASE ORDER LOOP LINK PACKETS -->
+    <tbody class="divide-y divide-slate-100">
+      {% for order in orders %}
+      
+      <!-- MAIN ROW TRANSACTION LAYOUT CARD -->
+      <tr id="order-row-{{ order.id }}" class="hover:bg-slate-50/40 transition border-b border-slate-100 text-xs font-medium text-slate-600">
+        
+        <!-- column 1: Expand drawer button sits on this exact column -->
+        <td class="p-4 text-center text-slate-400 font-bold cursor-pointer hover:text-slate-800 text-sm transition select-none" 
+            onclick="const dr = document.getElementById('order-drawer-{{ order.id }}'); if(dr){ const isHidden = dr.style.display === 'none'; dr.style.display = isHidden ? 'table-row' : 'none'; this.textContent = isHidden ? '▼' : '▶'; }">
+          ▶
+        </td>
+
+        <!-- Column 2: Order ID String Code Tag -->
+        <td class="p-4 text-slate-900 font-bold tracking-tight">#{{ order.id|stringformat:"05d" }}</td>
+
+        <!-- Column 3: Customer Email Parameter -->
+        <td class="p-4 text-slate-600 truncate max-w-[200px] font-medium">{{ order.user.email|default:order.user.username }}</td>
+
+        <!-- Column 4: Storage Warehouse Slot Assignment Code -->
+        <td class="p-4 text-slate-500 font-semibold">{{ order.prepared_location|default:"Unassigned" }}</td>
+
+        <!-- Column 5: Grand Total Price Matrix Box -->
+        <td class="p-4 text-slate-900 font-bold">${{ order.total_amount }}</td>
+
+        <!-- Column 6: Order Date Placed Timestamp -->
+        <td class="p-4 text-slate-500 font-medium">{{ order.order_date|date:"M d, Y" }}</td>
+
+        <!-- Column 7: Dynamic State Status Indicators -->
+                
+        <td style="padding: 16px !important; text-align: left !important;">
+          {% if order.status == 'Pending' %}
+            <span class="text-[10px] px-2.5 py-1 rounded-lg font-black uppercase tracking-wide border" style="background-color: #e0f2fe !important; color: #0369a1 !important; border-color: #bae6fd !important; display: inline-block;">Pending Prep</span>
+          {% elif order.status == 'Ready for Pickup' %}
+            <span class="text-[10px] px-2.5 py-1 rounded-lg font-black uppercase tracking-wide border" style="background-color: #d1fae5 !important; color: #047857 !important; border-color: #a7f3d0 !important; display: inline-block;">Ready for Pickup</span>
+          {% elif order.status == 'Picked Up' %}
+            <span class="text-[10px] px-2.5 py-1 rounded-lg font-black uppercase tracking-wide border" style="background-color: #f1f5f9 !important; color: #475569 !important; border-color: #e2e8f0 !important; display: inline-block;">Completed</span>
+          {% elif order.status == 'Cancelled' %}
+            <!-- 🎯 ADDED: PREMIUM RED AUDIT BADGE FOR CANCELLED TRANSACTIONS -->
+            <span class="text-[10px] px-2.5 py-1 rounded-lg font-black uppercase tracking-wide border" style="background-color: #fee2e2 !important; color: #b91c1c !important; border-color: #fca5a5 !important; display: inline-block;">Cancelled</span>
+          {% endif %}
+        </td>
+
+
+
+        <!--Column 8: Action Buttons Workflow Controllers-->
+        <td style="padding: 16px !important; text-align: center !important;">
+          
+          <div class="flex flex-row items-center justify-center space-x-2 w-full">
+            
+            {% if order.status == 'Pending' %}
+              <!-- CHOICE 1: THE GREEN READY BUTTON -->
+              <form action="{% url 'change_order_status_backend' order.id %}" method="POST" class="inline m-0 p-0 w-full max-w-[65px]">
+                {% csrf_token %}
+                <input type="hidden" name="status_action_flag" value="advance_to_ready">
+                <button type="submit" class="bg-slate-100 hover:bg-emerald-600 text-white text-[10px] rounded-lg font-bold uppercase tracking-wider py-1.5 w-full rounded shadow-sm transition focus:outline-none">
+                  Ready
+                </button>
+              </form>
+              
+              <!-- CHOICE 2: THE SLATE CANCEL BUTTON -->
+              <form action="{% url 'change_order_status_backend' order.id %}" method="POST" class="inline m-0 p-0 w-full max-w-[65px]">
+                {% csrf_token %}
+                <input type="hidden" name="status_action_flag" value="cancel_order">
+                <button type="submit" class="bg-slate-100 hover:bg-red-50 text-black hover:text-red-600 text-[10px] rounded-lg font-bold uppercase tracking-wider py-1.5 w-full rounded border border-slate-200 transition focus:outline-none">
+                  Cancel
+                </button>
+              </form>
+
+            {% elif order.status == 'Ready for Pickup' %}
+              <!-- THE Indigo COMPLETE BUTTON -->
+              <form action="{% url 'change_order_status_backend' order.id %}" method="POST" class="inline m-0 p-0 w-full max-w-[80px]">
+                {% csrf_token %}
+                <input type="hidden" name="status_action_flag" value="advance_to_completed">
+                <button type="submit" class="bg-slate-100 hover:bg-indigo-700 text-white text-[10px] rounded-lg font-bold uppercase tracking-wider py-1.5 w-full rounded shadow-sm transition focus:outline-none">
+                  Complete
+                </button>
+              </form>
+              
+            {% elif order.status == 'Picked Up' %}
+              <span class="text-[10px] text-red italic font-bold uppercase tracking-wider select-none">Logged</span>
+            {% endif %}
+
+          </div>
+        </td>
+
+      </tr>
+
+      <!-- NATIVE INLINE HIDDEN DRAWER FRAME -->
+      <tr id="order-drawer-{{ order.id }}" class="bg-slate-50/40 select-none" style="display: none;">
+        <td colspan="8" class="p-4 border-b border-slate-100">
+          
+          <!-- FLATTENED ROW FRAME  -->
+          <div class="flex flex-row items-center justify-between bg-white rounded-xl border border-slate-200 p-4 max-w-5xl mx-auto shadow-sm">
+            
+            <!-- LEFT ALIGNED TEXTBOOK IDENTITY CARD -->
+            <div class="flex items-center space-x-4 text-left">
+              {% for item in order.items.all %}
+              <div class="flex items-center space-x-3.5">
+                
+                <!-- THUMBNAIL PROFILE -->
+                <div class="w-10 h-14 bg-slate-100 border border-slate-200 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm">
+                  {% if item.book.cover_img %}
+                    <img src="{{ item.book.cover_img }}" class="w-full h-full object-cover" alt="Book Cover">
+                  {% else %}
+                    <span class="text-[10px] text-slate-400">📖</span>
+                  {% endif %}
+                </div>
+
+                <!-- Title and Compressed Quantities -->
+                <div>
+                  <h4 class="font-bold text-slate-800 text-xs line-clamp-1 max-w-[340px] tracking-tight">{{ item.book.title }}</h4>
+                  <p class="text-slate-100 text-xs line-clamp-1 max-w-[340px] tracking-tight">{{ item.book.author }}</p>
+                  <p class="text-[10px] font-black text-indigo-600 tracking-wider mt-0.5">({{ item.quantity }}x)</p>
+                </div>
+
+              </div>
+              {% endfor %}
+            </div>
+
+            <!-- RIGHT ALIGNED MINI INLINE ASSIGNMENT INPUT FORM -->
+            <div class="flex-shrink-0">
+              <form action="{% url 'update_order_location_backend' order.id %}" method="POST" class="flex items-center space-x-2 m-0 p-0">
+                {% csrf_token %}
+                
+                <div class="relative flex items-center border border-slate-200 rounded-lg bg-slate-50 px-3 py-1.5 focus-within:bg-white focus-within:border-indigo-500 shadow-inner transition duration-150">
+                  <span class="text-slate-400 text-[10px] font-black uppercase tracking-wider mr-2 select-none pointer-events-none">Shelf:</span>
+                  <input 
+                    type="text" 
+                    name="new_prepared_location" 
+                    value="{{ order.prepared_location|default:'' }}" 
+                    placeholder="Assign Slot..." 
+                    class="bg-transparent text-xs font-bold text-slate-700 outline-none w-[110px]"
+                  >
+                </div>
+
+                <button type="submit" class="bg-slate-100 hover:bg-slate-800 text-white hover:text-white text-[10px] font-black tracking-wider px-4 py-2 rounded-lg transition shadow-sm focus:outline-none">
+                  Save
+                </button>
+              </form>
+            </div>
+
+          </div>
+
+        </td>
+      </tr>
+
+      {% empty %}
+      <tr>
+        <td colspan="8" class="p-8 text-center text-slate-400 font-bold uppercase tracking-wider italic bg-white">No student order records found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+
+  </div>
+
+</div>
+{% endblock content %}

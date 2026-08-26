@@ -1,0 +1,310 @@
+<!-- MAIN OVERLAY WRAPPER: Fixed fullscreen viewport layout -->
+<div
+  id="add-book-modal"
+  style="
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: transparent !important;
+    z-index: 9999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1.5rem !important;
+  "
+>
+  <!-- PREMIUM CARD BACKDROP-->
+  <div
+    class="bg-white rounded-lg shadow-lg border border-slate-200/80 w-full max-w-2xl flex flex-col overflow-hidden transition-all duration-200"
+  >
+    <!-- HEADER CONTROLS BAR -->
+    <div
+      class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 flex-shrink-0"
+    >
+      <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider">
+        📚 Add New Textbook Record
+      </h3>
+      <button
+        type="button"
+        onclick="
+          document
+            .getElementById('add-book-modal')
+            .style.setProperty('display', 'none', 'important')
+        "
+        class="text-slate-400 hover:text-slate-600 text-lg focus:outline-none"
+      >
+        &times;
+      </button>
+    </div>
+
+    <!-- REGISTRATION DATA FIELDS FORM -->
+    <form
+      action="{% url 'add_book_backend' %}"
+      method="POST"
+      class="p-6 flex flex-col gap-4 bg-white"
+      style="margin: 0 !important"
+    >
+      {% csrf_token %}
+
+      <!-- Row 1: ISBN Input Box-->
+      <div
+        style="
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 6px !important;
+          width: 100% !important;
+        "
+      >
+        <label
+          class="block text-[11px] font-black text-slate-500 uppercase tracking-wider pl-1"
+          >ISBN Code</label
+        >
+        <input
+          type="text"
+          name="isbn"
+          placeholder="e.g. 978-1718502710"
+          class="w-full h-10 bg-white border-2 border-slate-400 rounded-lg px-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600 transition"
+          style="border: 2px solid #94a3b8 !important"
+          required
+        />
+      </div>
+
+      <!-- Row 2: Book Title Input Box -->
+      <div
+        style="
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 6px !important;
+          width: 100% !important;
+        "
+      >
+        <label
+          class="block text-[11px] font-black text-slate-500 uppercase tracking-wider pl-1"
+          >Book Title</label
+        >
+        <input
+          type="text"
+          name="title"
+          placeholder="e.g. Python Crash Course"
+          class="w-full h-10 bg-white border-2 border-slate-400 rounded-lg px-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600 transition"
+          style="border: 2px solid #94a3b8 !important"
+          required
+        />
+      </div>
+
+      <!-- Row 3: Author Name & Academic Department Autosuggest Fields -->
+      <div
+        style="
+          display: flex !important;
+          flex-direction: row !important;
+          gap: 16px !important;
+          width: 100% !important;
+        "
+      >
+        <div
+          style="
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+          "
+        >
+          <label
+            class="block text-[11px] font-black text-slate-500 uppercase tracking-wider pl-1"
+            >Author Name</label
+          >
+          <input
+            type="text"
+            name="author"
+            placeholder="e.g. Eric Matthes"
+            class="w-full h-10 bg-white border-2 border-slate-400 rounded-lg px-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600 transition"
+            style="border: 2px solid #94a3b8 !important"
+            required
+          />
+        </div>
+        <div
+          style="
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+          "
+        >
+          <label
+            class="block text-[11px] font-black text-slate-500 uppercase tracking-wider pl-1"
+            >Department</label
+          >
+          <input
+            type="text"
+            name="department"
+            list="department-options"
+            placeholder="e.g. Computer Science"
+            class="w-full h-10 bg-white border-2 border-slate-400 rounded-lg px-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600 transition"
+            style="border: 2px solid #94a3b8 !important"
+          />
+          <datalist id="department-options">
+            {% for dept in departments %}
+            <option value="{{ dept.name }}"></option>
+            {% endfor %}
+          </datalist>
+        </div>
+      </div>
+
+      <!-- Row 4: Price Matrix & Stock Level-->
+      <div
+        style="
+          display: flex !important;
+          flex-direction: row !important;
+          gap: 16px !important;
+          width: 100% !important;
+        "
+      >
+        <div
+          style="
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+          "
+        >
+          <label
+            class="block text-[11px] font-black text-slate-500 uppercase tracking-wider pl-1"
+            >Price Matrix (USD)</label
+          >
+          <input
+            type="text"
+            name="price"
+            value="10.00"
+            class="w-full h-10 bg-white border-2 border-slate-400 rounded-lg px-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600 transition"
+            style="border: 2px solid #94a3b8 !important"
+            required
+          />
+        </div>
+        <div
+          style="
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+          "
+        >
+          <label
+            class="block text-[11px] font-black text-slate-500 uppercase tracking-wider pl-1"
+            >Current Stock</label
+          >
+          <input
+            type="number"
+            name="stock_quantity"
+            value="1"
+            min="0"
+            class="w-full h-10 bg-white border-2 border-slate-400 rounded-lg px-3 text-sm font-medium text-slate-800 text-center font-bold focus:outline-none focus:border-indigo-600 transition"
+            style="border: 2px solid #94a3b8 !important"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- Row 5: Cover Artwork URL Image Address Field -->
+      <div
+        style="
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 6px !important;
+          width: 100% !important;
+        "
+      >
+        <label
+          class="block text-[11px] font-black text-slate-500 uppercase tracking-wider pl-1"
+          >Cover Artwork Web Image Address URL</label
+        >
+        <input
+          type="url"
+          name="cover_img"
+          placeholder="Paste thumbnail image URL link..."
+          class="w-full h-10 bg-white border-2 border-slate-400 rounded-lg px-3 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-600 transition"
+          style="border: 2px solid #94a3b8 !important"
+        />
+      </div>
+
+      <!-- Row 6: Detailed Description Summary Textarea Box -->
+      <div
+        style="
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 6px !important;
+          width: 100% !important;
+        "
+      >
+        <label
+          class="block text-[11px] font-black text-slate-500 uppercase tracking-wider pl-1"
+          >Description Syllabus Overview Summary</label
+        >
+        <textarea
+          name="description"
+          rows="3"
+          placeholder="Enter textbook summary descriptions..."
+          class="w-full bg-white border-2 border-slate-400 rounded-lg p-3 text-sm font-medium text-slate-800 resize-none focus:outline-none focus:border-indigo-600 transition"
+          style="border: 2px solid #94a3b8 !important; height: 80px !important"
+        ></textarea>
+      </div>
+
+      <!-- Footer Control Panel Links -->
+      <div
+        class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100 bg-white flex-shrink-0 mt-2"
+      >
+        <!-- CANCEL BUTTON-->
+        <button
+          type="button"
+          onclick="
+            document
+              .getElementById('add-book-modal')
+              .style.setProperty('display', 'none', 'important')
+          "
+          class="px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+          style="
+            background-color: #f1f5f9 !important;
+            color: #334155 !important;
+            border: 1px solid #cbd5e1 !important;
+            display: inline-block !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease-in-out !important;
+            outline: none !important;
+            margin-top: 10px;
+          "
+          onmouseover="
+            this.style.backgroundColor = '#e2e8f0';
+            this.style.borderColor = '#94a3b8';
+          "
+          onmouseout="
+            this.style.backgroundColor = '#f1f5f9';
+            this.style.borderColor = '#cbd5e1';
+          "
+        >
+          Cancel
+        </button>
+
+        <!--ADD BOOK BUTTON-->
+        <button
+          type="submit"
+          class="px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+          style="
+            background-color: #eab308 !important;
+            color: #0f172a !important;
+            border: none !important;
+            display: inline-block !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease-in-out !important;
+            outline: none !important;
+            margin-top: 10px;
+          "
+          onmouseover="this.style.backgroundColor = '#ca8a04'"
+          onmouseout="this.style.backgroundColor = '#eab308'"
+        >
+          Add Book
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

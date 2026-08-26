@@ -234,7 +234,11 @@ class BookstoreApp {
     await this.fetchBooksFromAPI();
   }
 
-  // --- CATALOG & BOOK CARDS ---
+  getDepartmentName(book) {
+    if (!book) return 'General';
+    const dept = book.department || (book.departments ? book.departments.split(',')[0] : null) || book.department_name;
+    return (dept && dept.trim()) ? dept.trim() : 'General';
+  }
 
   renderHomeGrid() {
     const grid = document.getElementById('homeBookGrid');
@@ -262,7 +266,7 @@ class BookstoreApp {
 
     grid.innerHTML = this.books.map(book => {
       const inStock = book.stock_quantity > 0;
-      const deptName = book.department || 'General';
+      const deptName = this.getDepartmentName(book);
       const hasCover = book.cover_img && book.cover_img.trim();
       const coverHtml = hasCover
         ? `<img src="${book.cover_img.trim()}" alt="${this.escapeHtml(book.title)}" class="book-cover-img" onerror="this.outerHTML='<div class=\\'book-placeholder-icon\\'></div>'">`
@@ -310,7 +314,7 @@ class BookstoreApp {
 
     document.getElementById('detailTitle').innerText = book.title;
     document.getElementById('detailAuthorLine').innerText = book.author ? `by ${book.author}` : 'by PUC Faculty';
-    document.getElementById('detailCategoryBadge').innerText = (book.department || 'General').toUpperCase();
+    document.getElementById('detailCategoryBadge').innerText = this.getDepartmentName(book).toUpperCase();
     document.getElementById('detailPrice').innerText = `$${parseFloat(book.price).toFixed(2)}`;
     document.getElementById('detailDescription').innerText = book.description || 'This book has been designated as the primary textbook for the course. It covers modern methodologies, software planning, system architecture, agile development, testing, and project management practices.';
     
@@ -476,7 +480,7 @@ class BookstoreApp {
     container.innerHTML = this.cart.map(item => {
       const lineTotal = item.price * item.quantity;
       total += lineTotal;
-      const deptName = (item.department || 'General').toUpperCase();
+      const deptName = this.getDepartmentName(item).toUpperCase();
       const hasCover = item.cover_img && item.cover_img.trim();
       const coverHtml = hasCover
         ? `<img src="${item.cover_img.trim()}" alt="${this.escapeHtml(item.title)}" class="cart-item-cover" onerror="this.outerHTML='<div class=\\'cart-item-cover\\'><div class=\\'book-placeholder-icon\\' style=\\'transform: scale(0.6);\\'></div></div>'">`

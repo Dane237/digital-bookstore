@@ -241,6 +241,9 @@ async def get_books(department: str = "all", q: str = ""):
     books = cursor.fetchall()
     cursor.close()
     conn.close()
+    for b in books:
+        depts = b.get('departments')
+        b['department'] = depts.split(',')[0].strip() if depts else 'General'
     return books
 
 @app.post("/api/register/")

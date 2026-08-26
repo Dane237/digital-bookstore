@@ -1,0 +1,72 @@
+<!-- THE SELF-CONTAINED POPUP MODALS DELETION ENGINE -->
+{% for book in books %}
+<div
+  id="delete-modal-{{ book.id }}"
+  style="
+    display: none !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    background-color: transparent !important;
+    z-index: 9999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 1rem !important;
+  "
+>
+  <div
+    class="bg-white rounded-lg shadow-lg border border-slate-200/80 w-full max-w-md flex flex-col overflow-hidden animate-fade-in"
+  >
+    <div class="p-6 text-center">
+      <!-- Icon Visual Anchor Header -->
+      <div
+        class="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4 border border-red-100"
+      >
+        <span class="text-xl">⚠️</span>
+      </div>
+
+      <h3
+        class="text-sm font-black text-slate-800 uppercase tracking-wider mb-2"
+      >
+        Permanent Deletion Warning
+      </h3>
+
+      <p class="text-xs text-slate-500 mb-6 leading-relaxed">
+        Are you absolutely sure you want to permanently remove <br />
+        <strong class="text-slate-800 font-bold">"{{ book.title }}"</strong>
+        from the catalog?<br />
+        This action immediately purges the item record from the database.
+      </p>
+
+      <!-- SUBMISSION PACKET-->
+      <form
+        action="{% url 'delete_book_backend' book.id %}"
+        method="POST"
+        class="w-full flex items-center justify-center space-x-3"
+      >
+        {% csrf_token %}
+
+        <!-- Close Layer Button -->
+        <button
+          type="button"
+          onclick="document.getElementById('delete-modal-{{ book.id }}').style.setProperty('display', 'none', 'important')"
+          class="bg-slate-400 hover:bg-slate-500 text-white px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+        >
+          Cancel
+        </button>
+
+        <!-- Fire Database Purge Button -->
+        <button
+          type="submit"
+          class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+        >
+          Confirm Delete
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
