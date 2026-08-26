@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-# 🌟 1. USER PROFILE: Inherits Django's robust authentication while matching your team's constraints
+#  1. USER PROFILE: Inherits Django's robust authentication while matching your team's constraints
 class User(models.Model):
     ROLE_CHOICES = [
         ('Customer', 'Customer'),
@@ -19,7 +19,7 @@ class User(models.Model):
         return f"{self.username} ({self.role})"
 
 
-# 🏢 2. DEPARTMENT TABLE
+#  2. DEPARTMENT TABLE
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
@@ -27,7 +27,7 @@ class Department(models.Model):
         return self.name
 
 
-# 📚 3. BOOK TABLE
+#  3. BOOK TABLE
 class Book(models.Model):
     isbn = models.CharField(max_length=20, unique=True)
     title = models.CharField(max_length=255)
@@ -43,7 +43,7 @@ class Book(models.Model):
         return self.title
 
 
-# 📦 4. ORDER TABLE: Maps directly to Section 5
+#  4. ORDER TABLE: Maps directly to Section 5
 class Order(models.Model):
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
@@ -70,7 +70,7 @@ class Order(models.Model):
         return f"Order #{self.id} - {self.status}"
 
 
-# 🛒 5. ORDER ITEM TABLE: Section 6 Bridge
+#  5. ORDER ITEM TABLE: Section 6 Bridge
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     book = models.ForeignKey(Book, on_delete=models.PROTECT, related_name='order_entries')
@@ -79,3 +79,17 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity}x {self.book.title} (Order #{self.order.id})"
+
+class PasswordReset(models.Model):
+    # References the built-in user table as a primary key link cleanly
+    email = models.OneToOneField(
+        User, 
+        primary_key=True, 
+        on_delete=models.CASCADE, 
+        db_column='email'
+    )
+    otp = models.CharField(max_length=10)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        db_table = 'password_resets'
