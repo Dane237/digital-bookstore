@@ -4,11 +4,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    # 1. Clean, native Django admin path
+    # 🔐 Your single, secure gateway to log into Django's built-in backend database core
     path('admin/', admin.site.urls),
-
-    # 2. Your custom dashboard path
-    path('dashboard/', include('admin_dashboard.urls')),
+    
+    # 🏢 THE ULTIMATE ROOT ROAD: Empty quotes mean your link goes straight to your admin dashboard instantly!
+    path('', include('admin_dashboard.urls')),
 ]
 
 # 🎯 CRITICAL CONTRACT: Connects local development routes to serve media upload paths dynamically
