@@ -44,5 +44,8 @@ urlpatterns = [
 
     path('settings/', views.account_settings_view, name='admin_settings'),
 
+    
+
+
 
 ]
