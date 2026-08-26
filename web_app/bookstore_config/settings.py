@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-5eyk@=e*q1x-l#a5g3s++6)qw-x#3c#lh@6qk*+@k^*=p*ew1-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
 
 # Application definition
@@ -82,17 +82,26 @@ WSGI_APPLICATION = 'bookstore_config.wsgi.application'
 
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'digital_bookstore',
-        'USER': 'postgres',
-        'PASSWORD': 'largeuniverse',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
-    }
-}
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': 'digital_bookstore',
+#        'USER': 'postgres',
+#        'PASSWORD': 'largeuniverse',
+#        'HOST': '127.0.0.1',
+#        'PORT': '5432',
+#    }
+#}
 
+
+import dj_database_url
+
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default='postgresql://db_admin:cX09s9ki7x6QdiF5EfykUXOKAeH4Qrlt@dpg-da7ftdu7bikc73ajmjeg-a.oregon-postgres.render.com/puc_digital_bookstore_cloud_db'
+    )
+}
 
 
 # Password validation
@@ -144,7 +153,11 @@ MAILERS = {
 
 import os
 
-# 🖼️ LOCAL SYSTEM MEDIA STORAGE PATHS
+# LOCAL SYSTEM MEDIA STORAGE PATHS
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 

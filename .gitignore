@@ -54,3 +54,5 @@ app.*.map.json
 # ETL Output
 etl/output/
 
+venv/
+
