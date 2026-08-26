@@ -5,8 +5,8 @@ from django.http import JsonResponse
 
 def inventory_dashboard_view(request):
     """
-    MASTER SYNC VIEW: Focuses strictly on pulling your dynamic books 
-    and department category matrices straight from your live PostgreSQL tables.
+    MASTER SYNC VIEW: Focuses strictly on pulling dynamic books 
+    and department category matrices straight from PostgreSQL tables.
     """
     all_books = Book.objects.all().order_by('-id')
     all_depts = Department.objects.all().order_by('name')
@@ -24,7 +24,7 @@ from .models import Order
 def orders_view(request):
     """
     ORDERS DASHBOARD VIEW: Fetches, filters, and searches student 
-    transactions out of your PostgreSQL database simultaneously.
+    transactions out of PostgreSQL database simultaneously.
     """
     # Grab incoming search queries or active status tab parameters
     search_query = request.GET.get('search_q', '').strip()
@@ -66,7 +66,7 @@ def orders_view(request):
 
 from django.shortcuts import render
 from django.db.models import Q
-from .models import Book # Imports your database book tracking table structure
+from .models import Book # Imports database book tracking table structure
 
 def catalog_view(request):
     """
@@ -103,7 +103,7 @@ def add_book_backend(request):
         author_input = request.POST.get("author")
         isbn_input = request.POST.get("isbn")
         
-        # FIX LOOKUP KEYS: Ensure these match what's sent from the modal form
+        # LOOKUP KEYS: Ensure these match what's sent from the modal form
         price_input = request.POST.get("price", "0.00")
         stock_input = request.POST.get("stock_quantity", "0")
         
@@ -122,7 +122,7 @@ def add_book_backend(request):
             cover_img=img_input                           
         )
 
-                #  MULTI-DEPARTMENT SPLITTER: Slices text by commas to save multiple links at once!
+        #  MULTI-DEPARTMENT SPLITTER: Slices text by commas to save multiple links at once
         if dept_input:
             # Slices the text by commas into a list (e.g., ['Mathematics', 'Computer Science'])
             departments_list = [d.strip() for d in dept_input.split(",") if d.strip()]
@@ -147,7 +147,7 @@ def edit_book_backend(request, book_id):
     book_obj = get_object_or_404(Book, id=book_id)
     
     if request.method == "POST":
-        # Extract the updated input data variables from your text fields
+        # Extract the updated input data variables from text fields
         book_obj.title = request.POST.get("title")
         book_obj.author = request.POST.get("author")
         book_obj.isbn = request.POST.get("isbn")
@@ -156,7 +156,7 @@ def edit_book_backend(request, book_id):
         book_obj.description = request.POST.get("description")
         book_obj.cover_img = request.POST.get("cover_img")       
         
-                # MULTI-DEPARTMENT EDIT SPLITTER
+        # MULTI-DEPARTMENT EDIT SPLITTER
         dept_input = request.POST.get("department")      
         if dept_input:
             book_obj.departments.clear()  # Clear old links first
@@ -166,7 +166,7 @@ def edit_book_backend(request, book_id):
                 book_obj.departments.add(dept_obj)
 
             
-        # Save updates directly to your database disk clusters
+        # Save updates directly to database disk clusters
         book_obj.save()
         return redirect("inventory_dashboard")
         
@@ -183,10 +183,10 @@ def delete_book_backend(request, book_id):
     # 1. Safely pull the requested book row, or throw a 404 if it doesn't exist
     book_obj = get_object_or_404(Book, id=book_id)
     
-    # 2. Delete it completely from your local system drive
+    # 2. Delete it completely from local system drive
     book_obj.delete()
     
-    # 3. Refresh and return cleanly back onto your active ledger dashboard lanes
+    # 3. Refresh and return cleanly back onto active ledger dashboard lanes
     return redirect("inventory_dashboard")
 
 
@@ -335,7 +335,7 @@ def inventory_dashboard_view(request):
      CORE INVENTORY VIEW: Lists catalog items and dynamically handles
     the top toolbar's live search filter matrix.
     """
-    #  Catch the incoming query text from your top toolbar field box
+    #  Catch the incoming query text from top toolbar field box
     search_query = request.GET.get('search_inventory', '').strip()
     
     # Start by grabbing all books ordered by newest first
@@ -397,7 +397,7 @@ def auto_seed_orders_view(request):
      FOOLPROOF DATA SEEDER VIEW: Programmatically forces a master user 
     and two mock textbook orders to write directly into your database.
     """
-    #  1. Resolve and secure the exact Custom User Model class instance your database expects
+    #  1. Resolve and secure the exact Custom User Model class instance database expects
     UserClass = get_user_model()
     
     #  Try to look up the specific 'admin' user profile account directly

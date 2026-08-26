@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
 PUC Digital Bookstore - Database Initialization & Seed Script
-Creates SQLite database schema aligned with mobile customer schema and seeds initial departments & course textbooks.
+Creates PostgreSQL database schema aligned with mobile customer schema and seeds initial departments & course textbooks.
 """
 
-import sqlite3
 import hashlib
 import secrets
 import os

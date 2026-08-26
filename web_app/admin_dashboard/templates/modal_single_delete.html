@@ -50,18 +50,45 @@
         {% csrf_token %}
 
         <!-- Close Layer Button -->
+        <!--CANCEL BUTTON -->
         <button
           type="button"
           onclick="document.getElementById('delete-modal-{{ book.id }}').style.setProperty('display', 'none', 'important')"
-          class="bg-slate-400 hover:bg-slate-500 text-white px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+          class="px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+          style="
+            background-color: #f1f5f9 !important;
+            color: #334155 !important;
+            border: 1px solid #cbd5e1 !important;
+            display: inline-block !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease-in-out !important;
+          "
+          onmouseover="
+            this.style.backgroundColor = '#e2e8f0';
+            this.style.borderColor = '#94a3b8';
+          "
+          onmouseout="
+            this.style.backgroundColor = '#f1f5f9';
+            this.style.borderColor = '#cbd5e1';
+          "
         >
           Cancel
         </button>
 
-        <!-- Fire Database Purge Button -->
+        <!--CONFIRM DELETE BUTTON-->
         <button
           type="submit"
-          class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+          class="px-5 py-2 h-10 rounded-lg text-xs font-bold uppercase tracking-wider transition shadow-sm focus:outline-none"
+          style="
+            background-color: #dc2626 !important;
+            color: #ffffff !important;
+            border: none !important;
+            display: inline-block !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease-in-out !important;
+          "
+          onmouseover="this.style.backgroundColor = '#b91c1c'"
+          onmouseout="this.style.backgroundColor = '#dc2626'"
         >
           Confirm Delete
         </button>
