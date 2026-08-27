@@ -101,8 +101,8 @@ import dj_database_url
 
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://db_admin:cX09s9ki7x6QdiF5EfykUXOKAeH4Qrlt@dpg-da7ftdu7bikc73ajmjeg-a.oregon-postgres.render.com/puc_digital_bookstore_cloud_db'
+     'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL')
     )
 }
 
