@@ -41,7 +41,9 @@ app.add_middleware(
 )
 
 # Mount Customer Web App static files & serve index.html at '/'
-customer_web_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'web_app', 'customer'))
+customer_web_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'customer'))
+if not os.path.exists(customer_web_dir):
+    customer_web_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'web_app', 'customer'))
 if os.path.exists(customer_web_dir):
     for subfolder in ['css', 'js', 'assets']:
         folder_path = os.path.join(customer_web_dir, subfolder)
