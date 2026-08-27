@@ -1,4 +1,0 @@
--keep class com.stripe.android.** { *; }
--dontwarn com.stripe.android.**
--keep class com.google.android.gms.** { *; }
--dontwarn com.google.android.gms.**

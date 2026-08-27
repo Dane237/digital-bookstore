@@ -14,9 +14,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 # noinspection PyPackageRequirements
 import psycopg2
-# noinspection PyPackageRequirements
+from psycopg2.pool import ThreadedConnectionPool
 from psycopg2.extras import RealDictCursor
-# noinspection PyPackageRequirements
 from dotenv import load_dotenv
 # noinspection PyPackageRequirements
 import stripe
@@ -24,7 +23,11 @@ from datetime import datetime, timedelta
 import urllib.request
 
 # Load configuration
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(env_path)
+
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 app = FastAPI(title="PUC Bookstore API")
 
@@ -36,6 +39,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount Customer Web App static files & serve index.html at '/'
+customer_web_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'web_app', 'customer'))
+if os.path.exists(customer_web_dir):
+    for subfolder in ['css', 'js', 'assets']:
+        folder_path = os.path.join(customer_web_dir, subfolder)
+        if os.path.exists(folder_path):
+            app.mount(f"/{subfolder}", StaticFiles(directory=folder_path), name=subfolder)
+
+    @app.get("/")
+    def read_root():
+        index_file = os.path.join(customer_web_dir, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        return {"status": "PUC Bookstore API is running", "docs": "/docs"}
 
 # Configure Stripe
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY', 'sk_test_mockkey')
@@ -102,6 +120,7 @@ class UserRegister(BaseModel):
     username: str
     email: str
     password: str
+    student_id: Optional[str] = None
 
 class StaffCreateRequest(BaseModel):
     username: str
@@ -148,24 +167,74 @@ class ManualBookAddRequest(BaseModel):
     description: Optional[str] = ""
     cover_img: Optional[str] = ""
 
-# — DATABASE (PostgreSQL) —
+# — DATABASE (PostgreSQL Connection Pooling) —
+
+db_pool = None
+
+class PooledConnectionWrapper:
+    def __init__(self, conn, pool):
+        self._conn = conn
+        self._pool = pool
+
+    def cursor(self, *args, **kwargs):
+        return self._conn.cursor(*args, **kwargs)
+
+    def commit(self):
+        return self._conn.commit()
+
+    def rollback(self):
+        return self._conn.rollback()
+
+    def close(self):
+        if self._pool and self._conn:
+            try:
+                self._pool.putconn(self._conn)
+            except Exception:
+                pass
+
+    def __getattr__(self, name):
+        return getattr(self._conn, name)
+
+def init_db_pool():
+    global db_pool
+    if db_pool is None or db_pool.closed:
+        db_url = os.getenv('DATABASE_URL') or os.getenv('POSTGRES_URL')
+        if db_url:
+            logging.info("⚡ Initializing High-Performance DB Connection Pool via DATABASE_URL")
+            db_pool = ThreadedConnectionPool(minconn=2, maxconn=15, dsn=db_url)
+        else:
+            host = os.getenv('DB_HOST', 'localhost')
+            db_name = os.getenv('DB_NAME', 'puc_bookstore')
+            user = os.getenv('DB_USER', 'postgres')
+            password = os.getenv('DB_PASSWORD', 'pass123')
+            port = os.getenv('DB_PORT', '5432')
+            logging.info(f"⚡ Initializing High-Performance DB Connection Pool at {host}:{port}/{db_name}")
+            db_pool = ThreadedConnectionPool(
+                minconn=2, maxconn=15,
+                host=host, database=db_name, user=user, password=password, port=port
+            )
 
 def get_db_connection():
-    host = os.getenv('DB_HOST', 'localhost')
-    db_name = os.getenv('DB_NAME', 'puc_bookstore')
-    user = os.getenv('DB_USER', 'postgres')
-    password = os.getenv('DB_PASSWORD', 'pass123')
-    port = os.getenv('DB_PORT', '5432')
-    
-    logging.info(f"Connecting to DB at {host}:{port}/{db_name}")
-    return psycopg2.connect(
-        host=host,
-        database=db_name,
-        user=user,
-        password=password,
-        port=port,
-        connect_timeout=10
-    )
+    global db_pool
+    if db_pool is None or db_pool.closed:
+        init_db_pool()
+    try:
+        raw_conn = db_pool.getconn()
+        if raw_conn.closed != 0:
+            db_pool.putconn(raw_conn, close=True)
+            raw_conn = db_pool.getconn()
+        return PooledConnectionWrapper(raw_conn, db_pool)
+    except Exception as e:
+        logging.warning(f"Connection pool fallback: {e}")
+        db_url = os.getenv('DATABASE_URL') or os.getenv('POSTGRES_URL')
+        if db_url:
+            return psycopg2.connect(db_url, connect_timeout=10)
+        host = os.getenv('DB_HOST', 'localhost')
+        db_name = os.getenv('DB_NAME', 'puc_bookstore')
+        user = os.getenv('DB_USER', 'postgres')
+        password = os.getenv('DB_PASSWORD', 'pass123')
+        port = os.getenv('DB_PORT', '5432')
+        return psycopg2.connect(host=host, database=db_name, user=user, password=password, port=port, connect_timeout=10)
 
 @app.get("/api/health/")
 def health_check():
@@ -210,7 +279,7 @@ async def startup_event():
 def get_departments():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT name FROM departments ORDER BY name ASC")
+    cursor.execute("SELECT name FROM admin_dashboard_department ORDER BY name ASC")
     # noinspection PyTypeChecker
     depts_list = [row[0] for row in cursor.fetchall()]
     cursor.close()
@@ -222,21 +291,22 @@ def get_books(department: str = "all", q: str = ""):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     query = """
-        SELECT b.*, STRING_AGG(d.name, ',') as departments 
-        FROM books b 
-        LEFT JOIN book_departments bd ON b.book_id = bd.book_id 
-        LEFT JOIN departments d ON bd.department_id = d.department_id 
+        SELECT b.id AS book_id, b.isbn, b.title, b.author, b.price, b.stock_quantity, b.description, b.cover_img, b.created_at,
+               STRING_AGG(d.name, ', ') as departments 
+        FROM admin_dashboard_book b 
+        LEFT JOIN admin_dashboard_book_departments bd ON b.id = bd.book_id 
+        LEFT JOIN admin_dashboard_department d ON bd.department_id = d.id 
         WHERE 1=1
     """
     params = []
-    if department != "all":
-        query += " AND d.name = %s"
-        params.append(department)
+    if department and department != "all":
+        query += " AND (d.name = %s OR d.name ILIKE %s)"
+        params.extend([department, f"%{department}%"])
     if q:
         query += " AND (b.title ILIKE %s OR b.isbn ILIKE %s OR b.description ILIKE %s OR b.author ILIKE %s)"
         pattern = f"%{q}%"
         params.extend([pattern, pattern, pattern, pattern])
-    query += " GROUP BY b.book_id ORDER BY b.created_at DESC"
+    query += " GROUP BY b.id, b.isbn, b.title, b.author, b.price, b.stock_quantity, b.description, b.cover_img, b.created_at ORDER BY b.created_at DESC"
     cursor.execute(query, params)
     books = cursor.fetchall()
     cursor.close()
@@ -250,7 +320,7 @@ def get_books(department: str = "all", q: str = ""):
 def register_user(user: UserRegister):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("SELECT user_id FROM users WHERE email = %s", (user.email,))
+    cursor.execute("SELECT id AS user_id FROM admin_dashboard_user WHERE email = %s", (user.email,))
     if cursor.fetchone():
         cursor.close()
         conn.close()
@@ -264,9 +334,10 @@ def register_user(user: UserRegister):
         
     hashed = hash_password(user.password)
     
+    emp_id = user.student_id if user.student_id else ('PUC-ROOT-001' if role == 'Admin' else None)
     cursor.execute(
-        "INSERT INTO users (username, email, password_hash, role, employee_id) VALUES (%s, %s, %s, %s, %s) RETURNING user_id", 
-        (user.username, user.email, hashed, role, 'PUC-ROOT-001' if role == 'Admin' else None)
+        "INSERT INTO admin_dashboard_user (username, email, password_hash, role, employee_id, created_at) VALUES (%s, %s, %s, %s, %s, NOW()) RETURNING id AS user_id", 
+        (user.username, user.email, hashed, role, emp_id)
     )
     user_id = cursor.fetchone()['user_id']
     conn.commit()
@@ -275,7 +346,7 @@ def register_user(user: UserRegister):
     
     return {
         "status": "success", 
-        "user": {"user_id": user_id, "username": user.username, "email": user.email, "role": role}
+        "user": {"user_id": user_id, "username": user.username, "email": user.email, "role": role, "employee_id": emp_id}
     }
 
 @app.post("/api/admin/staff/add/")
@@ -283,13 +354,13 @@ def admin_add_staff(req: StaffCreateRequest):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT user_id FROM users WHERE email = %s", (req.email,))
+        cursor.execute("SELECT id AS user_id FROM admin_dashboard_user WHERE email = %s", (req.email,))
         if cursor.fetchone():
             raise HTTPException(status_code=400, detail="Staff email already exists")
         
         hashed = hash_password(req.password)
         cursor.execute(
-            "INSERT INTO users (username, email, password_hash, role, employee_id) VALUES (%s, %s, %s, 'Staff', %s)", 
+            "INSERT INTO admin_dashboard_user (username, email, password_hash, role, employee_id, created_at) VALUES (%s, %s, %s, 'Staff', %s, NOW())", 
             (req.username, req.email, hashed, req.employee_id)
         )
         conn.commit()
@@ -302,7 +373,7 @@ def admin_add_staff(req: StaffCreateRequest):
 def login_user(user: UserLogin):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("SELECT * FROM users WHERE email = %s", (user.email,))
+    cursor.execute("SELECT id AS user_id, username, email, password_hash, role, employee_id FROM admin_dashboard_user WHERE email = %s", (user.email,))
     db_user = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -321,7 +392,7 @@ def login_user(user: UserLogin):
 def forgot_password(req: OTPRequest):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("SELECT user_id, role FROM users WHERE email = %s", (req.email,))
+    cursor.execute("SELECT id AS user_id, role FROM admin_dashboard_user WHERE email = %s", (req.email,))
     user = cursor.fetchone()
 
     if not user:
@@ -387,7 +458,7 @@ def reset_password_confirm(req: PasswordResetConfirm):
         raise HTTPException(status_code=400, detail="Invalid code")
 
     new_hashed = hash_password(req.new_password)
-    cursor.execute("UPDATE users SET password_hash = %s WHERE email = %s", (new_hashed, req.email))
+    cursor.execute("UPDATE admin_dashboard_user SET password_hash = %s WHERE email = %s", (new_hashed, req.email))
     cursor.execute("DELETE FROM password_resets WHERE email = %s", (req.email,))
     conn.commit()
     cursor.close()
@@ -401,20 +472,20 @@ def admin_reset_password(req: AdminPasswordReset):
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
         # Verify the requester is actually an admin
-        cursor.execute("SELECT role FROM users WHERE user_id = %s", (req.admin_id,))
+        cursor.execute("SELECT role FROM admin_dashboard_user WHERE id = %s", (req.admin_id,))
         admin = cursor.fetchone()
         if not admin or admin['role'] != 'Admin':
             raise HTTPException(status_code=403, detail="Only Admins can perform this action")
 
         # Check if target user exists
-        cursor.execute("SELECT user_id FROM users WHERE email = %s", (req.target_user_email,))
+        cursor.execute("SELECT id AS user_id FROM admin_dashboard_user WHERE email = %s", (req.target_user_email,))
         target = cursor.fetchone()
         if not target:
             raise HTTPException(status_code=404, detail="Target user not found")
 
         # Update password
         new_hashed = hash_password(req.new_password)
-        cursor.execute("UPDATE users SET password_hash = %s WHERE email = %s", (new_hashed, req.target_user_email))
+        cursor.execute("UPDATE admin_dashboard_user SET password_hash = %s WHERE email = %s", (new_hashed, req.target_user_email))
         conn.commit()
         return {"status": "success", "message": f"Password for {req.target_user_email} has been reset by Admin."}
     finally:
@@ -426,12 +497,12 @@ def admin_add_book(data: ManualBookAddRequest):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO departments (name) VALUES (%s) ON CONFLICT (name) DO NOTHING", (data.department_name,))
-        cursor.execute("SELECT department_id FROM departments WHERE name = %s", (data.department_name,))
+        cursor.execute("INSERT INTO admin_dashboard_department (name) VALUES (%s) ON CONFLICT (name) DO NOTHING", (data.department_name,))
+        cursor.execute("SELECT id AS department_id FROM admin_dashboard_department WHERE name = %s", (data.department_name,))
         dept_id = cursor.fetchone()[0]
 
         query = """
-            INSERT INTO books (isbn, title, author, price, stock_quantity, description, cover_img)
+            INSERT INTO admin_dashboard_book (isbn, title, author, price, stock_quantity, description, cover_img)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (isbn) DO UPDATE SET 
                 title=EXCLUDED.title, author=EXCLUDED.author, price=EXCLUDED.price, 
@@ -441,7 +512,7 @@ def admin_add_book(data: ManualBookAddRequest):
         cursor.execute(query, (data.isbn, data.title, data.author, data.price, data.stock_quantity, data.description, data.cover_img))
         book_id = cursor.fetchone()[0]
 
-        cursor.execute("INSERT INTO book_departments (book_id, department_id) VALUES (%s, %s) ON CONFLICT DO NOTHING", (book_id, dept_id))
+        cursor.execute("INSERT INTO admin_dashboard_book_departments (book_id, department_id) VALUES (%s, %s) ON CONFLICT DO NOTHING", (book_id, dept_id))
         conn.commit()
         return {"status": "success"}
     finally:
@@ -453,7 +524,7 @@ def delete_book(book_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("DELETE FROM books WHERE book_id = %s", (book_id,))
+        cursor.execute("DELETE FROM admin_dashboard_book WHERE id = %s", (book_id,))
         conn.commit()
         return {"status": "success"}
     except psycopg2.Error as err:
@@ -471,14 +542,14 @@ def create_order(order: OrderCreate):
     try:
         pin = str(secrets.randbelow(900000) + 100000)
         cursor.execute(
-            "INSERT INTO orders (user_id, total_amount, pickup_pin, payment_method, stripe_payment_id) VALUES (%s, %s, %s, %s, %s) RETURNING order_id", 
+            "INSERT INTO admin_dashboard_order (user_id, order_date, status, total_amount, pickup_pin, payment_method, stripe_payment_id) VALUES (%s, NOW(), 'Pending', %s, %s, %s, %s) RETURNING id AS order_id", 
             (order.user_id, order.total_amount, pin, order.payment_method, order.stripe_payment_id)
         )
         oid = cursor.fetchone()['order_id']
         for item in order.items:
-            cursor.execute("INSERT INTO order_items (order_id, book_id, quantity, unit_price) VALUES (%s, %s, %s, %s)", (oid, item.book_id, item.quantity, item.unit_price))
+            cursor.execute("INSERT INTO admin_dashboard_orderitem (order_id, book_id, quantity, unit_price) VALUES (%s, %s, %s, %s)", (oid, item.book_id, item.quantity, item.unit_price))
             # Update stock only if sufficient quantity exists
-            cursor.execute("UPDATE books SET stock_quantity = stock_quantity - %s WHERE book_id = %s AND stock_quantity >= %s", (item.quantity, item.book_id, item.quantity))
+            cursor.execute("UPDATE admin_dashboard_book SET stock_quantity = stock_quantity - %s WHERE id = %s AND stock_quantity >= %s", (item.quantity, item.book_id, item.quantity))
             if cursor.rowcount == 0:
                 raise Exception(f"Insufficient stock for book ID {item.book_id}")
         conn.commit()
@@ -495,21 +566,39 @@ def user_orders(user_id: int):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     query = """
-        SELECT o.*, COUNT(oi.order_item_id) as item_count,
-               u_rel.username as released_by_name,
-               u_rel.employee_id as released_by_staff_id
-        FROM orders o 
-        LEFT JOIN order_items oi ON o.order_id = oi.order_id 
-        LEFT JOIN users u_rel ON o.released_by_staff_id = u_rel.user_id
+        SELECT o.id AS order_id, o.user_id, o.order_date, o.status, o.total_amount, 
+               o.payment_method, o.stripe_payment_id, o.pickup_pin, o.prepared_location, 
+               u_rel.username as released_by_name, u_rel.employee_id as released_by_staff_id
+        FROM admin_dashboard_order o 
+        LEFT JOIN admin_dashboard_user u_rel ON o.released_by_staff_id = u_rel.id
         WHERE o.user_id = %s 
-        GROUP BY o.order_id, u_rel.username, u_rel.employee_id
         ORDER BY o.order_date DESC
     """
     cursor.execute(query, (user_id,))
     orders = cursor.fetchall()
     for o in orders:
-        o['display_id'] = f"PUC-ORD-{o['order_id']+1000}"
-        o['created_at'] = o['order_date'].strftime('%Y-%m-%d %H:%M')
+        oid = o.get('order_id') or o.get('id')
+        o['order_id'] = oid
+        o['display_id'] = f"PUC-ORD-{oid+1000}"
+        o['total_amount'] = float(o['total_amount']) if o.get('total_amount') is not None else 0.0
+        if o.get('order_date'):
+            o['created_at'] = o['order_date'].strftime('%Y-%m-%d %H:%M')
+
+        # Automatically fetch complete items with cover images & authors for this order
+        item_query = """
+            SELECT oi.id AS order_item_id, oi.order_id, oi.book_id, oi.quantity, 
+                   oi.unit_price, b.title, b.author, b.cover_img, b.isbn
+            FROM admin_dashboard_orderitem oi
+            JOIN admin_dashboard_book b ON oi.book_id = b.id
+            WHERE oi.order_id = %s
+        """
+        cursor.execute(item_query, (oid,))
+        items = cursor.fetchall()
+        for item in items:
+            item['unit_price'] = float(item['unit_price']) if item.get('unit_price') is not None else 0.0
+            item['price'] = item['unit_price']
+        o['items'] = items
+
     cursor.close()
     conn.close()
     return orders
@@ -519,18 +608,18 @@ def cancel_order(order_id: int):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     try:
-        cursor.execute("SELECT status FROM orders WHERE order_id = %s", (order_id,))
+        cursor.execute("SELECT status FROM admin_dashboard_order WHERE id = %s", (order_id,))
         order = cursor.fetchone()
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
         if order['status'] in ['Picked Up', 'Cancelled']:
             raise HTTPException(status_code=400, detail=f"Cannot cancel order with status {order['status']}")
 
-        cursor.execute("UPDATE orders SET status = 'Cancelled' WHERE order_id = %s", (order_id,))
-        cursor.execute("SELECT book_id, quantity FROM order_items WHERE order_id = %s", (order_id,))
+        cursor.execute("UPDATE admin_dashboard_order SET status = 'Cancelled' WHERE id = %s", (order_id,))
+        cursor.execute("SELECT book_id, quantity FROM admin_dashboard_orderitem WHERE order_id = %s", (order_id,))
         items = cursor.fetchall()
         for item in items:
-            cursor.execute("UPDATE books SET stock_quantity = stock_quantity + %s WHERE book_id = %s", (item['quantity'], item['book_id']))
+            cursor.execute("UPDATE admin_dashboard_book SET stock_quantity = stock_quantity + %s WHERE id = %s", (item['quantity'], item['book_id']))
         
         conn.commit()
         return {"status": "success", "message": "Order cancelled and stock restored."}
@@ -548,19 +637,23 @@ def get_admin_orders(status: str):
     query = """
         SELECT o.*, u.username as customer_name,
                STRING_AGG(CONCAT(b.title, ' (x', oi.quantity, ')'), ', ') as items_summary
-        FROM orders o 
-        JOIN users u ON o.user_id = u.user_id 
-        LEFT JOIN order_items oi ON o.order_id = oi.order_id
-        LEFT JOIN books b ON oi.book_id = b.book_id
+        FROM admin_dashboard_order o 
+        JOIN admin_dashboard_user u ON o.user_id = u.id 
+        LEFT JOIN admin_dashboard_orderitem oi ON o.id = oi.order_id
+        LEFT JOIN admin_dashboard_book b ON oi.book_id = b.id
         WHERE o.status = %s
-        GROUP BY o.order_id, u.username
+        GROUP BY o.id, u.username
         ORDER BY o.order_date DESC
     """
     cursor.execute(query, (status,))
     orders = cursor.fetchall()
     for o in orders:
-        o['display_id'] = f"PUC-ORD-{o['order_id']+1000}"
-        o['created_at'] = o['order_date'].strftime('%Y-%m-%d %H:%M')
+        oid = o.get('order_id') or o.get('id')
+        o['order_id'] = oid
+        o['display_id'] = f"PUC-ORD-{oid+1000}"
+        o['total_amount'] = float(o['total_amount']) if o.get('total_amount') is not None else 0.0
+        if o.get('order_date'):
+            o['created_at'] = o['order_date'].strftime('%Y-%m-%d %H:%M')
     cursor.close()
     conn.close()
     return orders
@@ -570,7 +663,7 @@ def admin_prepare(order_id: int, location: str, staff_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "UPDATE orders SET status = 'Ready for Pickup', prepared_location = %s, prepared_by_staff_id = %s WHERE order_id = %s", 
+        "UPDATE admin_dashboard_order SET status = 'Ready for Pickup', prepared_location = %s, prepared_by_staff_id = %s WHERE id = %s", 
         (location, staff_id, order_id)
     )
     conn.commit()
@@ -584,8 +677,8 @@ def lookup_pin(pin: str):
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     query = """
         SELECT o.*, u.username as customer_name 
-        FROM orders o 
-        JOIN users u ON o.user_id = u.user_id 
+        FROM admin_dashboard_order o 
+        JOIN admin_dashboard_user u ON o.user_id = u.id 
         WHERE o.pickup_pin = %s
     """
     cursor.execute(query, (pin,))
@@ -606,7 +699,7 @@ def fulfill_pickup(order_id: int, staff_id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "UPDATE orders SET status = 'Picked Up', released_by_staff_id = %s, picked_up_at = NOW() WHERE order_id = %s", 
+        "UPDATE admin_dashboard_order SET status = 'Picked Up', released_by_staff_id = %s, picked_up_at = NOW() WHERE id = %s", 
         (staff_id, order_id)
     )
     conn.commit()
@@ -637,13 +730,17 @@ def order_details(order_id: int):
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
     query = """
-        SELECT oi.*, b.title 
-        FROM order_items oi 
-        JOIN books b ON oi.book_id = b.book_id 
+        SELECT oi.id AS order_item_id, oi.order_id, oi.book_id, oi.quantity, 
+               oi.unit_price, b.title, b.author, b.cover_img, b.isbn
+        FROM admin_dashboard_orderitem oi 
+        JOIN admin_dashboard_book b ON oi.book_id = b.id 
         WHERE oi.order_id = %s
     """
     cursor.execute(query, (order_id,))
     items = cursor.fetchall()
+    for item in items:
+        item['unit_price'] = float(item['unit_price']) if item.get('unit_price') is not None else 0.0
+        item['price'] = item['unit_price']
     cursor.close()
     conn.close()
     return items
@@ -655,7 +752,7 @@ def get_analytics():
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         
-        cursor.execute("SELECT COUNT(*) as count, SUM(total_amount) as revenue FROM orders WHERE status != 'Cancelled'")
+        cursor.execute("SELECT COUNT(*) as count, SUM(total_amount) as revenue FROM admin_dashboard_order WHERE status != 'Cancelled'")
         stats = cursor.fetchone()
         total_orders = stats['count'] if stats else 0
         total_revenue = float(stats['revenue'] or 0)
@@ -664,8 +761,8 @@ def get_analytics():
         # This number stays consistent as books turn into cash.
         cursor.execute("""
             SELECT (
-                COALESCE((SELECT SUM(total_amount) FROM orders WHERE status != 'Cancelled'), 0) + 
-                COALESCE((SELECT SUM(price * stock_quantity) FROM books WHERE stock_quantity > 0), 0)
+                COALESCE((SELECT SUM(total_amount) FROM admin_dashboard_order WHERE status != 'Cancelled'), 0) + 
+                COALESCE((SELECT SUM(price * stock_quantity) FROM admin_dashboard_book WHERE stock_quantity > 0), 0)
             ) as total_worth
         """)
         worth_result = cursor.fetchone()
@@ -673,11 +770,11 @@ def get_analytics():
         
         cursor.execute("""
             SELECT b.title, SUM(oi.quantity) as sold 
-            FROM order_items oi 
-            JOIN books b ON oi.book_id = b.book_id 
-            JOIN orders o ON oi.order_id = o.order_id
+            FROM admin_dashboard_orderitem oi 
+            JOIN books b ON oi.book_id = b.id 
+            JOIN admin_dashboard_order o ON oi.order_id = o.id
             WHERE o.status != 'Cancelled'
-            GROUP BY b.book_id, b.title 
+            GROUP BY b.id, b.title 
             ORDER BY sold DESC LIMIT 3
         """)
         top_books = cursor.fetchall()
@@ -685,18 +782,18 @@ def get_analytics():
         cursor.execute("""
             SELECT d.name, SUM(oi.quantity * oi.unit_price) as revenue 
             FROM departments d 
-            JOIN book_departments bd ON d.department_id = bd.department_id 
+            JOIN admin_dashboard_book_departments bd ON d.id = bd.id 
             JOIN order_items oi ON bd.book_id = oi.book_id 
-            JOIN orders o ON oi.order_id = o.order_id
+            JOIN admin_dashboard_order o ON oi.order_id = o.id
             WHERE o.status != 'Cancelled'
-            GROUP BY d.department_id, d.name
+            GROUP BY d.id, d.name
         """)
         sales_dept = cursor.fetchall()
         
         revenue_trend = []
         for i in range(6, -1, -1):
             target_date = (datetime.now() - timedelta(days=i)).date()
-            cursor.execute("SELECT SUM(total_amount) as daily_total FROM orders WHERE CAST(order_date AS DATE) = %s AND status != 'Cancelled'", (target_date,))
+            cursor.execute("SELECT SUM(total_amount) as daily_total FROM admin_dashboard_order WHERE CAST(order_date AS DATE) = %s AND status != 'Cancelled'", (target_date,))
             day_result = cursor.fetchone()
             daily_sum = float(day_result['daily_total'] or 0) if day_result else 0.0
             revenue_trend.append({
@@ -725,16 +822,16 @@ def seed_data():
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            DELETE FROM departments 
+            DELETE FROM admin_dashboard_department 
             WHERE name = 'Computer Science' 
                OR name = 'Technology'
         """)
         
         hashed = hash_password("password")
         cursor.execute("""
-            INSERT INTO users (user_id, username, email, password_hash, role, employee_id) 
+            INSERT INTO admin_dashboard_user (id, username, email, password_hash, role, employee_id) 
             VALUES (1, 'PUC Admin', 'vongchantha2001@gmail.com', %s, 'Admin', 'PUC-ROOT-001')
-            ON CONFLICT (user_id) DO UPDATE SET 
+            ON CONFLICT (id) DO UPDATE SET 
                 email='vongchantha2001@gmail.com',
                 role='Admin',
                 employee_id='PUC-ROOT-001'
@@ -742,7 +839,7 @@ def seed_data():
         
         depts = ['Computer Science & Tech', 'Business & Economics', 'Law & Public Affairs', 'Arts & Humanities', 'Information Technology']
         for dname in depts:
-            cursor.execute("INSERT INTO departments (name) VALUES (%s) ON CONFLICT (name) DO NOTHING", (dname,))
+            cursor.execute("INSERT INTO admin_dashboard_department (name) VALUES (%s) ON CONFLICT (name) DO NOTHING", (dname,))
         
         conn.commit()
         return {"status": "success", "message": "System database cleaned. Official departments and Staff account synced."}
@@ -758,7 +855,7 @@ def wipe_inventory():
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("DELETE FROM books")
+        cursor.execute("DELETE FROM admin_dashboard_book")
         conn.commit()
         return {"status": "success", "message": "Inventory wiped."}
     except Exception as e:

@@ -55,5 +55,10 @@ app.*.map.json
 etl/output/
 
 venv/
+.venv/
 
-
+# Excluded legacy & temporary folders
+scratch/
+database/
+etl/
+mobile_app/

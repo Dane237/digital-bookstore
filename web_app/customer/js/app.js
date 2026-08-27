@@ -6,8 +6,9 @@
 
 class BookstoreApp {
   constructor() {
-    const defaultRenderUrl = 'https://digital-bookstore-wm64.onrender.com/api';
-    this.apiBaseUrl = (window.PUC_API_BASE_URL || '').replace(/\/$/, '') || defaultRenderUrl;
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const defaultApiUrl = isLocalhost ? `${window.location.origin}/api` : 'https://digital-bookstore-wm64.onrender.com/api';
+    this.apiBaseUrl = (window.PUC_API_BASE_URL || '').replace(/\/$/, '') || defaultApiUrl;
     this.books = [];
     this.departments = [];
     this.selectedDepartment = 'all';
@@ -579,8 +580,11 @@ class BookstoreApp {
     }
 
     if (this.user) {
-      document.getElementById('checkoutCustName').innerText = this.user.username || 'Dara Sok';
-      document.getElementById('checkoutCustEmail').innerText = this.user.email || 'dara.sok@student.puc.edu.kh';
+      document.getElementById('checkoutCustName').innerText = this.user.username || 'Student User';
+      document.getElementById('checkoutCustEmail').innerText = `${this.user.email || ''} ${this.user.employee_id ? `(ID: ${this.user.employee_id})` : ''}`;
+    } else {
+      document.getElementById('checkoutCustName').innerText = 'Guest Student (Login Required)';
+      document.getElementById('checkoutCustEmail').innerText = 'Please log in to finalize order & receive pickup PIN';
     }
 
     const itemsContainer = document.getElementById('checkoutItemsList');
@@ -613,20 +617,24 @@ class BookstoreApp {
 
   handlePaymentMethodChange(radio) {
     document.querySelectorAll('.payment-option-radio-card').forEach(card => card.classList.remove('active'));
-    radio.closest('.payment-option-radio-card').classList.add('active');
+    if (radio && radio.closest('.payment-option-radio-card')) {
+      radio.closest('.payment-option-radio-card').classList.add('active');
+    }
 
     const cardForm = document.getElementById('cardInputsForm');
-    if (radio.value === 'Stripe Card') {
-      if (cardForm) cardForm.style.display = 'grid';
-    } else {
-      if (cardForm) cardForm.style.display = 'none';
-    }
+    if (cardForm) cardForm.style.display = 'grid';
   }
 
   async processPaymentSubmission() {
     if (!this.user || !this.user.user_id) {
       this.comingFromCheckout = true;
+      this.showToast('🔐 Please sign in or create an account to complete checkout.');
       this.navigateTo('login');
+      return;
+    }
+
+    if (!this.cart || this.cart.length === 0) {
+      this.showToast('🛒 Your shopping cart is empty.');
       return;
     }
 
@@ -634,12 +642,6 @@ class BookstoreApp {
     const method = selectedRadio ? selectedRadio.value : 'Stripe Card';
 
     let subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-    if (method === 'ABA Bank QR') {
-      this.openKhqrModal(subtotal);
-      return;
-    }
-
     await this.executeOrderCreation(method, subtotal);
   }
 
@@ -857,6 +859,70 @@ class BookstoreApp {
 
   // --- MY ORDERS VIEW ---
 
+  openOrderDetail(orderId) {
+    const o = (this.orders || []).find(item => item.order_id == orderId || item.id == orderId);
+    if (!o) {
+      this.showToast('❌ Order details not found');
+      return;
+    }
+
+    const displayId = o.display_id || `PUC-ORD-${(o.order_id || o.id) + 1000}`;
+    document.getElementById('modalReceiptDisplayId').innerText = `Order #${displayId}`;
+    document.getElementById('modalReceiptPin').innerText = o.pickup_pin || '482913';
+    document.getElementById('modalReceiptDate').innerText = `Purchased on ${o.created_at || 'Recently'}`;
+    document.getElementById('modalReceiptTotalVal').innerText = `$${parseFloat(o.total_amount).toFixed(2)}`;
+    document.getElementById('modalReceiptLocation').innerText = o.prepared_location || 'In-Store Pickup (Bookstore at Campus Building A, First Floor)';
+
+    // Status pill styling
+    const pill = document.getElementById('modalReceiptStatusPill');
+    if (pill) {
+      pill.innerText = o.status;
+      if (o.status === 'Ready for Pickup') {
+        pill.style.backgroundColor = '#DCFCE7';
+        pill.style.color = '#15803D';
+      } else if (o.status === 'Pending') {
+        pill.style.backgroundColor = '#FEF3C7';
+        pill.style.color = '#D97706';
+      } else if (o.status === 'Picked Up') {
+        pill.style.backgroundColor = '#E0F2FE';
+        pill.style.color = '#0369A1';
+      } else {
+        pill.style.backgroundColor = '#FEE2E2';
+        pill.style.color = '#B91C1C';
+      }
+    }
+
+    // Render Scannable QR Code
+    this.renderQrCode('modalReceiptQrCanvas', o.pickup_pin || '482913');
+
+    // Populate Items
+    const itemsListContainer = document.getElementById('modalReceiptItemsList');
+    if (itemsListContainer) {
+      const items = o.items || [];
+      if (items.length === 0) {
+        itemsListContainer.innerHTML = `<div style="font-size: 0.85rem; color: var(--gray-500);">Course Textbooks ($${parseFloat(o.total_amount).toFixed(2)})</div>`;
+      } else {
+        itemsListContainer.innerHTML = items.map(item => {
+          const title = item.title || 'Course Textbook';
+          const qty = item.quantity || 1;
+          const price = item.unit_price || item.price || (o.total_amount / items.length);
+          return `
+            <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 0.55rem 0.75rem; border-radius: 6px; border: 1px solid var(--gray-200);">
+              <div>
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--gray-900);">${this.escapeHtml(title)}</div>
+                <div style="font-size: 0.75rem; color: var(--gray-500);">Qty: ${qty}</div>
+              </div>
+              <div style="font-weight: 800; font-size: 0.85rem; color: var(--primary-navy);">$${(price * qty).toFixed(2)}</div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    const modal = document.getElementById('orderDetailModal');
+    if (modal) modal.classList.add('active');
+  }
+
   renderOrdersView() {
     const container = document.getElementById('ordersListContainer');
     if (!container) return;
@@ -891,14 +957,23 @@ class BookstoreApp {
 
     let html = '';
 
-    // Section 1: CURRENT ORDERS
+    // Section 1: CURRENT ACTIVE ORDERS
     html += `<div class="orders-section-heading">CURRENT ORDERS</div>`;
     if (currentOrders.length === 0) {
-      html += `<div style="color: var(--gray-500); font-size: 0.9rem; margin-bottom: 2rem;">No active orders.</div>`;
+      html += `<div style="color: var(--gray-500); font-size: 0.9rem; margin-bottom: 2rem;">No active orders currently.</div>`;
     } else {
       html += currentOrders.map(o => {
-        const displayId = o.display_id || `PUC-ORD-${o.order_id + 1000}`;
+        const oid = o.order_id || o.id;
+        const displayId = o.display_id || `PUC-ORD-${oid + 1000}`;
         const items = o.items || [];
+
+        let statusStyle = 'background-color: #FEF3C7; color: #D97706;';
+        let statusLabel = 'Preparing at Bookstore';
+        if (o.status === 'Ready for Pickup') {
+          statusStyle = 'background-color: #DCFCE7; color: #15803D; font-weight: 800;';
+          statusLabel = '🟢 Ready for Pickup at Counter!';
+        }
+
         const itemSummaryHtml = items.map(item => {
           const catalogMatch = (this.books || []).find(b =>
             (b.book_id && item.book_id && b.book_id == item.book_id) ||
@@ -929,14 +1004,26 @@ class BookstoreApp {
         }).join('');
 
         return `
-          <div class="order-card-item">
-            <div class="order-card-top">
-              <div class="order-number-title">
+          <div class="order-card-item" style="border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; background: white;">
+            <div class="order-card-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <div class="order-number-title" style="font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 0.75rem;">
                 Order #${displayId}
-                <span class="r-status-pill-paid" style="background-color: #FEF3C7; color: #D97706;">${o.status}</span>
+                <span class="r-status-pill-paid" style="${statusStyle} padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem;">${statusLabel}</span>
               </div>
-              <span class="order-date-text">${o.created_at || 'Recently'}</span>
+              <span class="order-date-text" style="font-size: 0.85rem; color: var(--gray-500);">${o.created_at || 'Recently'}</span>
             </div>
+
+            <!-- PROMINENT DIGITAL PICKUP PIN BADGE -->
+            <div style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); color: white; padding: 0.75rem 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin: 0.75rem 0;">
+              <div>
+                <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #94A3B8;">Counter Pickup PIN</div>
+                <div style="font-family: var(--font-mono); font-weight: 900; font-size: 1.4rem; color: #38BDF8; letter-spacing: 3px;">${o.pickup_pin || '482913'}</div>
+              </div>
+              <button class="btn-primary-action" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; background: rgba(56, 189, 248, 0.2); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4);" onclick="app.openOrderDetail('${oid}')">
+                <i class="fa-solid fa-qrcode"></i> Show Digital Pass
+              </button>
+            </div>
+
             ${itemSummaryHtml || `
               <div style="display: flex; align-items: center; gap: 1rem;">
                 <div style="width: 60px; height: 75px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; display: flex; align-items: center; justify-content: center;"><div class="book-placeholder-icon" style="transform: scale(0.6);"></div></div>
@@ -946,23 +1033,31 @@ class BookstoreApp {
                 </div>
               </div>
             `}
-            <div class="order-card-bottom-actions">
-              <button class="btn-text-link" style="color: var(--danger-red);" onclick="app.confirmCancelOrder(${o.order_id})">Cancel Order</button>
-              <button class="btn-outline-action" style="width: auto; padding: 0.5rem 1.25rem;" onclick="app.openOrderDetail('${o.order_id}')">View Receipt</button>
+
+            <div class="order-card-bottom-actions" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--gray-100); padding-top: 0.75rem;">
+              ${o.status === 'Pending' ? `<button class="btn-text-link" style="color: var(--danger-red); font-size: 0.85rem;" onclick="app.confirmCancelOrder(${oid})">Cancel Order</button>` : '<span></span>'}
+              <button class="btn-outline-action" style="width: auto; padding: 0.5rem 1.25rem;" onclick="app.openOrderDetail('${oid}')"><i class="fa-solid fa-receipt"></i> View Receipt</button>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    // Section 2: PAST ORDERS
+    // Section 2: PAST / COMPLETED ORDERS
     html += `<div class="orders-section-heading" style="margin-top: 1.5rem;">PAST ORDERS</div>`;
     if (pastOrders.length === 0) {
-      html += `<div style="color: var(--gray-500); font-size: 0.9rem;">No past orders.</div>`;
+      html += `<div style="color: var(--gray-500); font-size: 0.9rem;">No past orders found.</div>`;
     } else {
       html += pastOrders.map(o => {
-        const displayId = o.display_id || `PUC-ORD-${o.order_id + 1000}`;
+        const oid = o.order_id || o.id;
+        const displayId = o.display_id || `PUC-ORD-${oid + 1000}`;
         const items = o.items || [];
+
+        let statusStyle = 'background-color: #E0F2FE; color: #0369A1;';
+        if (o.status === 'Cancelled') {
+          statusStyle = 'background-color: #FEE2E2; color: #B91C1C;';
+        }
+
         const itemSummaryHtml = items.map(item => {
           const catalogMatch = (this.books || []).find(b =>
             (b.book_id && item.book_id && b.book_id == item.book_id) ||
@@ -995,13 +1090,13 @@ class BookstoreApp {
         }).join('');
 
         return `
-          <div class="order-card-item">
-            <div class="order-card-top">
-              <div class="order-number-title">
+          <div class="order-card-item" style="border: 1px solid var(--gray-200); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; background: white;">
+            <div class="order-card-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <div class="order-number-title" style="font-weight: 800; font-size: 1.05rem; display: flex; align-items: center; gap: 0.75rem;">
                 Order #${displayId}
-                <span class="r-status-pill-paid" style="background-color: var(--gray-100); color: var(--gray-700);">${o.status}</span>
+                <span class="r-status-pill-paid" style="${statusStyle} padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem;">${o.status}</span>
               </div>
-              <span class="order-date-text">${o.created_at || 'Completed'}</span>
+              <span class="order-date-text" style="font-size: 0.85rem; color: var(--gray-500);">${o.created_at || 'Completed'}</span>
             </div>
             ${itemSummaryHtml || `
               <div style="display: flex; align-items: center; gap: 1rem;">
@@ -1012,8 +1107,8 @@ class BookstoreApp {
                 </div>
               </div>
             `}
-            <div class="order-card-bottom-actions" style="justify-content: flex-end;">
-              <button class="btn-outline-action" style="width: auto; padding: 0.5rem 1.25rem;" onclick="app.openOrderDetail('${o.order_id}')">View Receipt</button>
+            <div class="order-card-bottom-actions" style="margin-top: 1rem; display: flex; justify-content: flex-end; border-top: 1px solid var(--gray-100); padding-top: 0.75rem;">
+              <button class="btn-outline-action" style="width: auto; padding: 0.5rem 1.25rem;" onclick="app.openOrderDetail('${oid}')"><i class="fa-solid fa-receipt"></i> View Receipt</button>
             </div>
           </div>
         `;
@@ -1164,7 +1259,7 @@ class BookstoreApp {
     
     const studentIdElem = document.getElementById('accStudentIdDisplay');
     if (studentIdElem) {
-      studentIdElem.innerText = this.user.student_id || '2026-1234';
+      studentIdElem.innerText = this.user.employee_id || this.user.student_id || 'PUC-STD-001';
     }
 
     const initial = this.user.username ? this.user.username.charAt(0).toUpperCase() : 'D';
