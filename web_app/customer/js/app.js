@@ -6,9 +6,7 @@
 
 class BookstoreApp {
   constructor() {
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const defaultApiUrl = isLocalhost ? `${window.location.origin}/api` : 'https://digital-bookstore-wm64.onrender.com/api';
-    this.apiBaseUrl = (window.PUC_API_BASE_URL || '').replace(/\/$/, '') || defaultApiUrl;
+    this.apiBaseUrl = (window.PUC_API_BASE_URL || '').replace(/\/$/, '') || `${window.location.origin}/api`;
     this.books = [];
     this.departments = [];
     this.selectedDepartment = 'all';
