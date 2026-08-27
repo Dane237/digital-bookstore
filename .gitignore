@@ -56,8 +56,3 @@ etl/output/
 
 venv/
 .venv/
-
-# Excluded legacy & temporary folders
-scratch/
-database/
-etl/
