@@ -203,6 +203,8 @@ def init_db_pool():
         db_url = os.getenv('DATABASE_URL') or os.getenv('POSTGRES_URL')
         if db_url:
             logging.info("⚡ Initializing High-Performance DB Connection Pool via DATABASE_URL")
+            if "sslmode=" not in db_url and "render.com" in db_url:
+                db_url += "?sslmode=require" if "?" not in db_url else "&sslmode=require"
             db_pool = ThreadedConnectionPool(minconn=2, maxconn=15, dsn=db_url)
         else:
             host = os.getenv('DB_HOST', 'localhost')
@@ -230,6 +232,8 @@ def get_db_connection():
         logging.warning(f"Connection pool fallback: {e}")
         db_url = os.getenv('DATABASE_URL') or os.getenv('POSTGRES_URL')
         if db_url:
+            if "sslmode=" not in db_url and "render.com" in db_url:
+                db_url += "?sslmode=require" if "?" not in db_url else "&sslmode=require"
             return psycopg2.connect(db_url, connect_timeout=10)
         host = os.getenv('DB_HOST', 'localhost')
         db_name = os.getenv('DB_NAME', 'puc_bookstore')
