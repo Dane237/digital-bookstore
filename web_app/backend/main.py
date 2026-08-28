@@ -283,44 +283,63 @@ async def startup_event():
 
 @app.get("/api/departments/")
 def get_departments():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT name FROM admin_dashboard_department ORDER BY name ASC")
-    # noinspection PyTypeChecker
-    depts_list = [row[0] for row in cursor.fetchall()]
-    cursor.close()
-    conn.close()
-    return depts_list
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM admin_dashboard_department ORDER BY name ASC")
+        # noinspection PyTypeChecker
+        depts_list = [row[0] for row in cursor.fetchall()]
+        cursor.close()
+        conn.close()
+        return depts_list
+    except Exception as e:
+        logging.error(f"Error fetching departments: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/books/")
 def get_books(department: str = "all", q: str = ""):
-    conn = get_db_connection()
-    cursor = conn.cursor(cursor_factory=RealDictCursor)
-    query = """
-        SELECT b.id AS book_id, b.isbn, b.title, b.author, b.price, b.stock_quantity, b.description, b.cover_img, b.created_at,
-               STRING_AGG(d.name, ', ') as departments 
-        FROM admin_dashboard_book b 
-        LEFT JOIN admin_dashboard_book_departments bd ON b.id = bd.book_id 
-        LEFT JOIN admin_dashboard_department d ON bd.department_id = d.id 
-        WHERE 1=1
-    """
-    params = []
-    if department and department != "all":
-        query += " AND (d.name = %s OR d.name ILIKE %s)"
-        params.extend([department, f"%{department}%"])
-    if q:
-        query += " AND (b.title ILIKE %s OR b.isbn ILIKE %s OR b.description ILIKE %s OR b.author ILIKE %s)"
-        pattern = f"%{q}%"
-        params.extend([pattern, pattern, pattern, pattern])
-    query += " GROUP BY b.id, b.isbn, b.title, b.author, b.price, b.stock_quantity, b.description, b.cover_img, b.created_at ORDER BY b.created_at DESC"
-    cursor.execute(query, params)
-    books = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    for b in books:
-        depts = b.get('departments')
-        b['department'] = depts.split(',')[0].strip() if depts else 'General'
-    return books
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        query = """
+            SELECT b.id AS book_id, b.isbn, b.title, b.author, b.price, b.stock_quantity, b.description, b.cover_img, b.created_at,
+                   STRING_AGG(d.name, ', ') as departments 
+            FROM admin_dashboard_book b 
+            LEFT JOIN admin_dashboard_book_departments bd ON b.id = bd.book_id 
+            LEFT JOIN admin_dashboard_department d ON bd.department_id = d.id 
+            WHERE 1=1
+        """
+        params = []
+        if department and department != "all":
+            query += " AND (d.name = %s OR d.name ILIKE %s)"
+            params.extend([department, f"%{department}%"])
+        if q:
+            query += " AND (b.title ILIKE %s OR b.isbn ILIKE %s OR b.description ILIKE %s OR b.author ILIKE %s)"
+            pattern = f"%{q}%"
+            params.extend([pattern, pattern, pattern, pattern])
+        query += " GROUP BY b.id, b.isbn, b.title, b.author, b.price, b.stock_quantity, b.description, b.cover_img, b.created_at ORDER BY b.created_at DESC"
+        cursor.execute(query, params)
+        books = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        # Convert to list of standard dicts and handle Decimal/datetime
+        result = []
+        for b in books:
+            book_dict = dict(b)
+            depts = book_dict.get('departments')
+            book_dict['department'] = depts.split(',')[0].strip() if depts else 'General'
+            # Convert Decimal to float for JSON serialization
+            if book_dict.get('price'):
+                book_dict['price'] = float(book_dict['price'])
+            # Convert datetime to string
+            if book_dict.get('created_at'):
+                book_dict['created_at'] = book_dict['created_at'].isoformat()
+            result.append(book_dict)
+        return result
+    except Exception as e:
+        logging.error(f"Error fetching books: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/register/")
 def register_user(user: UserRegister):

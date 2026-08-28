@@ -1,0 +1,1 @@
+import os, psycopg2; from dotenv import load_dotenv; load_dotenv('web_app/backend/.env'); conn = psycopg2.connect(os.getenv('DATABASE_URL')); cur = conn.cursor(); cur.execute("SELECT table_schema, table_name FROM information_schema.tables WHERE table_name LIKE 'admin_dashboard%'"); print(cur.fetchall()); cur.close(); conn.close()
